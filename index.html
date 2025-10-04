@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>WaniKanji — Practice Kanji by Level</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body class="bg-base-200 min-h-screen">
+        <div class="container mx-auto px-4 py-8 max-w-4xl">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-base-content mb-2">
+                    WaniKanji
+                </h1>
+                <p class="text-base-content/70">
+                    Practice just the kanji per level.
+                </p>
+            </div>
+
+            <div class="card bg-base-100 shadow-xl" id="setup">
+                <div class="card-body">
+                    <h2 class="card-title text-2xl mb-4">Setup</h2>
+
+                    <div class="form-control w-full mb-4">
+                        <label class="label">
+                            <span class="label-text">WaniKani API Token</span>
+                        </label>
+                        <input
+                            id="token"
+                            type="password"
+                            placeholder="Paste your WaniKani API token here"
+                            class="input input-bordered w-full"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/70"
+                                >Token is saved locally and used only for this
+                                session.</span
+                            >
+                        </label>
+                        <div class="text-sm text-base-content/70 mt-2">
+                            Need a token?
+                            <a
+                                href="https://www.wanikani.com/settings/personal_access_tokens"
+                                target="_blank"
+                                class="link link-primary hover:link-hover"
+                            >
+                                Get your API token here
+                            </a>
+                            <br />
+                            <span class="text-xs"
+                                >No additional permissions needed. This app only
+                                uses GET requests.</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <div class="form-control w-full sm:w-32">
+                            <label class="label">
+                                <span class="label-text">Level</span>
+                            </label>
+                            <div id="levelSkeleton" class="hidden">
+                                <div class="skeleton h-12 w-full"></div>
+                            </div>
+                            <input
+                                id="level"
+                                type="number"
+                                min="1"
+                                max="60"
+                                value="1"
+                                class="input input-bordered"
+                            />
+                        </div>
+
+                        <div class="flex flex-col gap-2 sm:flex-1">
+                            <div class="form-control w-full">
+                                <label
+                                    class="label cursor-pointer justify-start gap-2"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="modeEnglishToKanjiToggle"
+                                        class="checkbox checkbox-warning"
+                                    />
+                                    <span class="label-text"
+                                        >English Meaning → Japanese
+                                        Reading</span
+                                    >
+                                </label>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label
+                                    class="label cursor-pointer justify-start gap-2"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="modeToggle"
+                                        class="checkbox"
+                                        data-color-class="meaning"
+                                        checked
+                                    />
+                                    <span class="label-text"
+                                        >Kanji → English Meaning</span
+                                    >
+                                </label>
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label
+                                    class="label cursor-pointer justify-start gap-2"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="readingToggle"
+                                        class="checkbox"
+                                        data-color-class="reading"
+                                        checked
+                                    />
+                                    <span class="label-text"
+                                        >Kanji → Japanese Reading</span
+                                    >
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-actions justify-between items-center">
+                        <button id="loadBtn" class="btn btn-primary">
+                            Load Level and Start
+                        </button>
+                        <div id="setupMsg" class="text-sm text-error"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quizArea" class="hidden mt-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div
+                            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+                        >
+                            <div>
+                                <div
+                                    class="text-2xl font-bold text-primary"
+                                    id="progress"
+                                >
+                                    0 remaining
+                                </div>
+                                <div
+                                    class="text-sm text-base-content/70"
+                                    id="modeLabel"
+                                >
+                                    Mode: Kanji → English
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    id="backBtn"
+                                    class="btn btn-outline btn-sm"
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    id="exportBtn"
+                                    class="btn btn-outline btn-sm"
+                                >
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="question" class="text-center mb-8">
+                            <div class="kanji mb-4" id="kanjiDisplay"></div>
+                            <div
+                                id="modeLabelUnderKanji"
+                                class="text-sm font-medium px-3 py-1 rounded-full inline-block mb-2"
+                            ></div>
+                            <div
+                                id="meaningDisplay"
+                                class="text-lg text-base-content/80"
+                            ></div>
+                        </div>
+
+                        <div class="form-control mb-6">
+                            <div class="flex gap-2">
+                                <input
+                                    id="answer"
+                                    type="text"
+                                    placeholder="Type your answer here"
+                                    autocomplete="off"
+                                    class="input input-bordered flex-1"
+                                />
+                                <button id="checkBtn" class="btn btn-primary">
+                                    Answer
+                                </button>
+                                <button
+                                    id="continueBtn"
+                                    class="btn btn-success hidden"
+                                >
+                                    Continue
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="result" class="mb-4 hidden"></div>
+                        <div
+                            id="correctBox"
+                            class="bg-base-200 p-3 rounded mb-4 hidden"
+                        ></div>
+
+                        <div class="text-sm text-base-content/70 text-center">
+                            Wrong answers will be cycled back in. Refresh to
+                            restart.<br />
+                            <strong>Keyboard shortcuts:</strong> Enter to
+                            check/continue
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="completionArea" class="hidden mt-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body text-center">
+                        <h2 class="card-title text-3xl mb-4 justify-center">
+                            Quiz Complete!
+                        </h2>
+
+                        <div
+                            class="stats stats-vertical lg:stats-horizontal shadow mb-6"
+                        >
+                            <div class="stat">
+                                <div class="stat-title">Total Questions</div>
+                                <div
+                                    class="stat-value text-primary"
+                                    id="totalQuestions"
+                                >
+                                    0
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-title">
+                                    Correct (First Try)
+                                </div>
+                                <div
+                                    class="stat-value text-success"
+                                    id="correctAnswers"
+                                >
+                                    0
+                                </div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-title">
+                                    Incorrect (At Least Once)
+                                </div>
+                                <div
+                                    class="stat-value text-error"
+                                    id="incorrectAnswers"
+                                >
+                                    0
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions justify-center gap-2">
+                            <button
+                                id="restartBtn"
+                                class="btn btn-primary btn-lg"
+                            >
+                                Try Again
+                            </button>
+                            <button
+                                id="quizIncorrectBtn"
+                                class="btn btn-warning btn-lg"
+                            >
+                                Quiz Incorrect Answers
+                            </button>
+                            <button
+                                id="backToSetupBtn"
+                                class="btn btn-outline btn-lg"
+                            >
+                                Back to Setup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kanji Results Card -->
+                <div class="card bg-base-100 shadow-xl mt-4">
+                    <div class="card-body">
+                        <h3 class="card-title text-xl mb-4 justify-center">
+                            Kanji Results
+                        </h3>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Correct Kanji -->
+                            <div
+                                class="card bg-success/10 border border-success/20"
+                            >
+                                <div class="card-body p-4">
+                                    <h4
+                                        class="card-title text-success text-lg mb-3"
+                                    >
+                                        Correct Kanji
+                                    </h4>
+                                    <div
+                                        id="correctKanjiList"
+                                        class="text-sm max-h-64 overflow-y-auto"
+                                    >
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Incorrect Kanji -->
+                            <div
+                                class="card bg-error/10 border border-error/20"
+                            >
+                                <div class="card-body p-4">
+                                    <h4
+                                        class="card-title text-error text-lg mb-3"
+                                    >
+                                        Incorrect Kanji
+                                    </h4>
+                                    <div
+                                        id="incorrectKanjiList"
+                                        class="text-sm max-h-64 overflow-y-auto"
+                                    >
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast container -->
+        <div id="toast-container" class="toast toast-top toast-end"></div>
+
+        <!-- Load JavaScript modules -->
+        <script src="js/romanji-converter.js"></script>
+        <script src="js/api.js"></script>
+        <script src="js/cross-mode-validation.js"></script>
+        <script src="js/quiz-core.js"></script>
+        <script src="js/ui-utils.js"></script>
+        <script src="js/event-handlers.js"></script>
+    </body>
+</html>
