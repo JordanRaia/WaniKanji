@@ -476,7 +476,6 @@ function updateLoadButtonState() {
     if (allUnchecked) {
         startAllBtn.disabled = true;
         selectKanjiBtn.disabled = true;
-        // Lesson button is always enabled regardless of mode toggles
         setupMsg.textContent = "Please select at least one mode to start quiz.";
         setupMsg.className = "text-sm text-warning";
     } else {
