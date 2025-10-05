@@ -29,6 +29,7 @@ let originalQueueLength = 0;
 let correctKanji = new Set(); // Track which kanji were answered correctly first time
 let incorrectKanji = new Set(); // Track which kanji were answered incorrectly
 let allKanjiData = []; // Store all kanji data for reference
+let useSrsFilter = false; // Track if SRS filtering is enabled for this quiz
 
 // Cross-mode validation tracking
 let userInputHistory = new Map(); // Track user input for each kanji in both modes
@@ -69,6 +70,7 @@ function startQuiz(items) {
     modeEnglishToKanji = document.getElementById(
         "modeEnglishToKanjiToggle"
     ).checked;
+    useSrsFilter = document.getElementById("srsFilterToggle").checked;
 
     // Create queue based on selected modes
     queue = [];

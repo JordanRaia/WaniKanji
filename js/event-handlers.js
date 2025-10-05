@@ -5,6 +5,8 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
     document.getElementById("setupMsg").textContent = "";
     const token = document.getElementById("token").value.trim();
     const level = document.getElementById("level").value.trim();
+    const useSrsFilter = document.getElementById("srsFilterToggle").checked;
+
     if (!token) {
         document.getElementById("setupMsg").textContent =
             "Please add your API token.";
@@ -17,10 +19,17 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
     try {
         document.getElementById("loadBtn").disabled = true;
         document.getElementById("loadBtn").textContent = "Loading...";
-        const items = await fetchKanjiForLevel(token, level);
+
+        // Use filtered or unfiltered function based on checkbox
+        const items = useSrsFilter
+            ? await fetchKanjiForLevelFilteredBySRS(token, level)
+            : await fetchKanjiForLevel(token, level);
+
         if (!items.length) {
-            document.getElementById("setupMsg").textContent =
-                "No kanji found for that level.";
+            const message = useSrsFilter
+                ? "No kanji found for that level below Guru rank (or all kanji are at Guru or above)."
+                : "No kanji found for that level.";
+            document.getElementById("setupMsg").textContent = message;
             document.getElementById("loadBtn").disabled = false;
             document.getElementById("loadBtn").textContent =
                 "Load level and start";
@@ -127,8 +136,12 @@ document.getElementById("restartBtn").addEventListener("click", () => {
     const token = document.getElementById("token").value.trim();
     const level = document.getElementById("level").value.trim();
 
-    // Restart the quiz with the same level
-    fetchKanjiForLevel(token, level)
+    // Restart the quiz with the same level using the same filter setting
+    const fetchFunction = useSrsFilter
+        ? fetchKanjiForLevelFilteredBySRS
+        : fetchKanjiForLevel;
+
+    fetchFunction(token, level)
         .then((items) => {
             startQuiz(items);
         })
