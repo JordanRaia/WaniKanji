@@ -292,6 +292,7 @@ function checkAnswer() {
     }
 
     let ok = false;
+    let hasTypo = false; // Track if answer was close to correct
 
     if (card.questionType === "kanji-to-reading") {
         // Input field already contains hiragana, check directly against readings
@@ -303,10 +304,23 @@ function checkAnswer() {
         }
     } else if (card.questionType === "kanji-to-english") {
         const got = normalize(raw);
+
+        // First try exact match
         for (const m of card.meanings) {
             if (normalize(m) === got) {
                 ok = true;
                 break;
+            }
+        }
+
+        // If no exact match, try fuzzy matching
+        if (!ok) {
+            const normalizedMeanings = card.meanings.map((m) => normalize(m));
+            const fuzzyResult = findBestFuzzyMatch(got, normalizedMeanings, 80);
+
+            if (fuzzyResult.isMatch) {
+                ok = true;
+                hasTypo = fuzzyResult.hasTypo;
             }
         }
     } else if (card.questionType === "english-to-kanji") {
@@ -398,7 +412,11 @@ function checkAnswer() {
 
     if (ok) {
         // Show toast notification for correct answer
-        showToast("Correct! Well done!", "success");
+        if (hasTypo) {
+            showToast("Correct! (Watch out for typos)", "info");
+        } else {
+            showToast("Correct! Well done!", "success");
+        }
 
         // Track this kanji as answered correctly
         correctKanji.add(card.kanji);
