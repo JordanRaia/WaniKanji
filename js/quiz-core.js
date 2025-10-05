@@ -53,6 +53,10 @@ function shuffle(a) {
 
 function startQuiz(items) {
     allKanjiData = items.slice(); // Store all kanji data
+    // Store for "Try Again" functionality
+    if (typeof lastQuizItems !== "undefined") {
+        lastQuizItems = items.slice();
+    }
     currentIndex = 0;
     correctCount = 0;
     incorrectCount = 0;

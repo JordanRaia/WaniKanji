@@ -64,7 +64,7 @@ async function fetchKanjiForLevelFilteredBySRS(token, level) {
     const assignments = await fetchAssignmentsForSubjects(token, subjectIds);
 
     // Filter to only include:
-    // 1. Kanji not yet unlocked (no assignment data)
+    // 1. Kanji not yet unlocked
     // 2. Kanji with SRS stage < 5 (below Guru: Apprentice stages 1-4, Lessons stage 0)
     const filteredKanji = allKanji.filter((kanji) => {
         const assignment = assignments.get(kanji.id);
@@ -74,7 +74,7 @@ async function fetchKanjiForLevelFilteredBySRS(token, level) {
             return true;
         }
 
-        // Include if SRS stage is less than 5 (Guru starts at 5)
+        // Include if SRS stage is less than 5
         // SRS stages: 0 = Lessons, 1-4 = Apprentice, 5-6 = Guru, 7 = Master, 8 = Enlightened, 9 = Burned
         return assignment.srsStage < 5;
     });
