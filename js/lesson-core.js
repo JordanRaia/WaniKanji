@@ -100,7 +100,10 @@ function showLessonCard() {
         const meaningMnemonicContent =
             lesson.meaning_mnemonic || "No mnemonic available.";
         meaningMnemonicElement.innerHTML = DOMPurify.sanitize(
-            meaningMnemonicContent
+            meaningMnemonicContent,
+            {
+                ADD_TAGS: ["radical", "kanji", "vocabulary", "reading", "ja"],
+            }
         );
     }
 
@@ -116,7 +119,10 @@ function showLessonCard() {
         const readingMnemonicContent =
             lesson.reading_mnemonic || "No mnemonic available.";
         readingMnemonicElement.innerHTML = DOMPurify.sanitize(
-            readingMnemonicContent
+            readingMnemonicContent,
+            {
+                ADD_TAGS: ["radical", "kanji", "vocabulary", "reading", "ja"],
+            }
         );
     }
 

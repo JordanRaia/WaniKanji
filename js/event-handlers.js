@@ -45,8 +45,7 @@ async function loadKanjiFromAPI() {
                 message =
                     "No unlocked kanji found below Guru rank for this level.";
             } else if (useSrsFilter) {
-                message =
-                    "No kanji found for that level below Guru rank (or all kanji are at Guru or above).";
+                message = "No kanji found for that level below Guru rank.";
             } else if (unlockedOnly) {
                 message = "No unlocked kanji found for this level.";
             } else {
@@ -315,13 +314,16 @@ function resetSetupButtons() {
     const startBtn = document.getElementById("startAllBtn");
     const selectBtn = document.getElementById("selectKanjiBtn");
     const lessonBtn = document.getElementById("selectLessonBtn");
+    const learnBtn = document.getElementById("learnKanjiBtn");
 
     startBtn.disabled = false;
     selectBtn.disabled = false;
     lessonBtn.disabled = false;
+    learnBtn.disabled = false;
     startBtn.textContent = "Start Quiz with All";
     selectBtn.textContent = "Select Kanji for Quiz";
     lessonBtn.textContent = "Select Kanji for Lessons";
+    learnBtn.textContent = "Learn Kanji";
 }
 
 // Select All button handler
@@ -392,6 +394,7 @@ async function loadApiKey() {
             document.getElementById("level").classList.add("hidden");
             document.getElementById("startAllBtn").disabled = true;
             document.getElementById("selectKanjiBtn").disabled = true;
+            document.getElementById("learnKanjiBtn").disabled = true;
             document.getElementById("modeToggle").disabled = true;
             document.getElementById("readingToggle").disabled = true;
 
@@ -409,6 +412,7 @@ async function loadApiKey() {
             document.getElementById("level").classList.remove("hidden");
             document.getElementById("startAllBtn").disabled = false;
             document.getElementById("selectKanjiBtn").disabled = false;
+            document.getElementById("learnKanjiBtn").disabled = false;
             document.getElementById("modeToggle").disabled = false;
             document.getElementById("readingToggle").disabled = false;
         }
@@ -430,6 +434,7 @@ document.getElementById("token").addEventListener("input", async (e) => {
             document.getElementById("level").classList.add("hidden");
             document.getElementById("startAllBtn").disabled = true;
             document.getElementById("selectKanjiBtn").disabled = true;
+            document.getElementById("learnKanjiBtn").disabled = true;
             document.getElementById("modeToggle").disabled = true;
             document.getElementById("readingToggle").disabled = true;
 
@@ -447,6 +452,7 @@ document.getElementById("token").addEventListener("input", async (e) => {
             document.getElementById("level").classList.remove("hidden");
             document.getElementById("startAllBtn").disabled = false;
             document.getElementById("selectKanjiBtn").disabled = false;
+            document.getElementById("learnKanjiBtn").disabled = false;
             document.getElementById("modeToggle").disabled = false;
             document.getElementById("readingToggle").disabled = false;
         }
@@ -466,6 +472,7 @@ function updateLoadButtonState() {
     const startAllBtn = document.getElementById("startAllBtn");
     const selectKanjiBtn = document.getElementById("selectKanjiBtn");
     const selectLessonBtn = document.getElementById("selectLessonBtn");
+    const learnKanjiBtn = document.getElementById("learnKanjiBtn");
     const setupMsg = document.getElementById("setupMsg");
 
     const allUnchecked =
@@ -622,13 +629,33 @@ document
     .getElementById("startQuizFromLessons")
     .addEventListener("click", () => {
         document.getElementById("lessonCompletionArea").classList.add("hidden");
-        // Store items for "Try Again" functionality
-        lastQuizItems = lessonKanjiData.slice();
-        startQuiz(lessonKanjiData);
-        showToast(
-            `Starting quiz with ${lessonKanjiData.length} kanji from lessons`,
-            "info"
-        );
+
+        // Check if we're in learn mode
+        if (typeof learnKanjiMode !== "undefined" && learnKanjiMode) {
+            // Start learn mode quiz
+            startLearnModeQuiz();
+        } else {
+            // Store items for "Try Again" functionality
+            lastQuizItems = lessonKanjiData.slice();
+            startQuiz(lessonKanjiData);
+            showToast(
+                `Starting quiz with ${lessonKanjiData.length} kanji from lessons`,
+                "info"
+            );
+        }
+    });
+
+// Review Lessons Again button handler
+document
+    .getElementById("reviewLessonsAgain")
+    .addEventListener("click", async () => {
+        document.getElementById("lessonCompletionArea").classList.add("hidden");
+
+        // Restart lessons with the same kanji data
+        const token = document.getElementById("token").value.trim();
+        await startLessons(lessonKanjiData, token);
+
+        showToast("Reviewing lessons again", "info");
     });
 
 // Back to Setup from Lesson Completion button handler
@@ -639,3 +666,194 @@ document
         document.getElementById("setup").classList.remove("hidden");
         resetSetupButtons();
     });
+
+// Learn Kanji button handler
+document.getElementById("learnKanjiBtn").addEventListener("click", async () => {
+    const startBtn = document.getElementById("startAllBtn");
+    const selectBtn = document.getElementById("selectKanjiBtn");
+    const lessonBtn = document.getElementById("selectLessonBtn");
+    const learnBtn = document.getElementById("learnKanjiBtn");
+
+    // Disable buttons while loading
+    startBtn.disabled = true;
+    selectBtn.disabled = true;
+    lessonBtn.disabled = true;
+    learnBtn.disabled = true;
+    learnBtn.textContent = "Loading...";
+
+    const items = await loadKanjiFromAPI();
+
+    if (items) {
+        showLearnKanjiSelectionScreen(items);
+    } else {
+        // Re-enable buttons if loading failed
+        startBtn.disabled = false;
+        selectBtn.disabled = false;
+        lessonBtn.disabled = false;
+        learnBtn.disabled = false;
+        learnBtn.textContent = "Learn Kanji";
+    }
+});
+
+// Learn Kanji Select All button handler
+document
+    .getElementById("learnKanjiSelectAllBtn")
+    .addEventListener("click", () => {
+        document
+            .querySelectorAll(".learn-kanji-checkbox")
+            .forEach((checkbox) => {
+                checkbox.checked = true;
+            });
+        updateLearnKanjiSelectedCount();
+    });
+
+// Learn Kanji Deselect All button handler
+document
+    .getElementById("learnKanjiDeselectAllBtn")
+    .addEventListener("click", () => {
+        document
+            .querySelectorAll(".learn-kanji-checkbox")
+            .forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+        updateLearnKanjiSelectedCount();
+    });
+
+// Back to Setup from Learn Selection button handler
+document
+    .getElementById("backToSetupFromLearnSelection")
+    .addEventListener("click", () => {
+        document
+            .getElementById("learnKanjiSelectionArea")
+            .classList.add("hidden");
+        document.getElementById("setup").classList.remove("hidden");
+        resetSetupButtons();
+    });
+
+// Start Learn Kanji button handler
+document
+    .getElementById("startLearnKanjiBtn")
+    .addEventListener("click", async () => {
+        const selectedIds = Array.from(
+            document.querySelectorAll(".learn-kanji-checkbox:checked")
+        ).map((cb) => parseInt(cb.dataset.kanjiId));
+
+        // Filter loaded items to only include selected ones
+        const selectedItems = learnSelectionScreenKanjiItems.filter((item) =>
+            selectedIds.includes(item.id)
+        );
+
+        if (selectedItems.length === 0) {
+            showToast("Please select at least one kanji", "warning");
+            return;
+        }
+
+        // Hide selection screen
+        document
+            .getElementById("learnKanjiSelectionArea")
+            .classList.add("hidden");
+
+        showToast(
+            `Starting learning mode with ${selectedItems.length} kanji`,
+            "success"
+        );
+
+        // Initialize learn mode with selected kanji (starts lessons immediately)
+        const token = document.getElementById("token").value.trim();
+        await initializeLearnKanjiMode(selectedItems, token);
+    });
+
+// Start Learn Batch Lessons button handler
+document
+    .getElementById("startLearnBatchLessons")
+    .addEventListener("click", async () => {
+        await startLearnBatchLessons();
+    });
+
+// Exit Learn Mode from Progress screen button handler
+document
+    .getElementById("exitLearnModeFromProgress")
+    .addEventListener("click", () => {
+        exitLearnMode();
+    });
+
+// Redo Learn Quiz button handler
+document.getElementById("redoLearnQuiz").addEventListener("click", () => {
+    redoLearnQuiz();
+});
+
+// Continue Learn Kanji button handler
+document.getElementById("continueLearnKanji").addEventListener("click", () => {
+    continueToNextBatch();
+});
+
+// Exit Learn Mode from Quiz completion button handler
+document
+    .getElementById("exitLearnModeFromQuiz")
+    .addEventListener("click", () => {
+        exitLearnMode();
+    });
+
+// Final Quiz All Learned button handler
+document.getElementById("finalQuizAllLearned").addEventListener("click", () => {
+    startFinalQuizAllLearned();
+});
+
+// Back to Setup from Learning Complete button handler
+document
+    .getElementById("backToSetupFromLearningComplete")
+    .addEventListener("click", () => {
+        exitLearnMode();
+    });
+
+// Global Enter key handler for Learn Mode screens
+document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    // Don't trigger if user is typing in an input field (for quiz)
+    if (e.target.tagName === "INPUT") {
+        return;
+    }
+
+    // Check which learn mode screen is visible and trigger appropriate action
+
+    // Lesson Completion Screen -> Quiz These Kanji
+    const lessonCompletionVisible = !document
+        .getElementById("lessonCompletionArea")
+        .classList.contains("hidden");
+    if (
+        lessonCompletionVisible &&
+        typeof learnKanjiMode !== "undefined" &&
+        learnKanjiMode
+    ) {
+        e.preventDefault();
+        document.getElementById("startQuizFromLessons").click();
+        return;
+    }
+
+    // Learn Quiz Completion Screen -> Continue Learning
+    const learnQuizCompletionVisible = !document
+        .getElementById("learnQuizCompletionArea")
+        .classList.contains("hidden");
+    if (learnQuizCompletionVisible) {
+        e.preventDefault();
+        const continueBtn = document.getElementById("continueLearnKanji");
+        // Only click if button is visible (not hidden when all kanji learned)
+        if (!continueBtn.classList.contains("hidden")) {
+            continueBtn.click();
+        }
+        return;
+    }
+
+    // Ready for Lessons Screen -> Start Lessons
+    const learnProgressVisible = !document
+        .getElementById("learnModeProgressArea")
+        .classList.contains("hidden");
+    if (learnProgressVisible) {
+        e.preventDefault();
+        document.getElementById("startLearnBatchLessons").click();
+        return;
+    }
+});

@@ -95,10 +95,12 @@ function applyColorConfig() {
     }
 }
 
-function showCompletionScreen() {
-    document.getElementById("quizArea").classList.add("hidden");
-    document.getElementById("completionArea").classList.remove("hidden");
-
+/**
+ * Calculates quiz scores based on mode configuration
+ * Handles both single-mode and multi-mode quiz scoring
+ * @returns {{ finalCorrectCount: number, finalIncorrectCount: number, isMultiMode: boolean }}
+ */
+function calculateQuizScores() {
     // Check if multiple modes are enabled, use question-based tracking
     const modesCount =
         (modeKanjiToEnglish ? 1 : 0) +
@@ -106,13 +108,38 @@ function showCompletionScreen() {
         (modeEnglishToKanji ? 1 : 0);
     const isMultiMode = modesCount > 1;
 
+    let finalCorrectCount = correctCount;
+    let finalIncorrectCount = incorrectCount;
+
     if (isMultiMode) {
-        correctCount = correctQuestions.size;
-        incorrectCount = incorrectQuestions.size;
+        // Multi-mode: use question-based tracking
+        finalCorrectCount = correctQuestions.size;
+        finalIncorrectCount = incorrectQuestions.size;
     } else {
-        // For single mode, use the existing logic
-        incorrectCount = incorrectKanji.size;
+        // Single mode: use kanji-based tracking
+        finalIncorrectCount = incorrectKanji.size;
     }
+
+    return { finalCorrectCount, finalIncorrectCount, isMultiMode };
+}
+
+function showCompletionScreen() {
+    // Check if we're in learn mode
+    if (typeof learnKanjiMode !== "undefined" && learnKanjiMode) {
+        // Show learn mode completion screen
+        showLearnQuizCompletionScreen();
+        return;
+    }
+
+    document.getElementById("quizArea").classList.add("hidden");
+    document.getElementById("completionArea").classList.remove("hidden");
+
+    // Calculate scores using shared utility
+    const { finalCorrectCount, finalIncorrectCount } = calculateQuizScores();
+
+    // Update global variables for backward compatibility
+    correctCount = finalCorrectCount;
+    incorrectCount = finalIncorrectCount;
 
     // Update the completion screen with stats
     document.getElementById("totalQuestions").textContent = originalQueueLength;
@@ -128,9 +155,13 @@ function showCompletionScreen() {
     }
 }
 
-function triggerConfetti() {
+function triggerConfetti(selector = "#completionArea .card") {
     // Get the position of the quiz complete card
-    const completionCard = document.querySelector("#completionArea .card");
+    const completionCard = document.querySelector(selector);
+    if (!completionCard) {
+        // Fallback to center of screen if card not found
+        return;
+    }
     const rect = completionCard.getBoundingClientRect();
     const x = (rect.left + rect.right) / 2 / window.innerWidth;
     const y = (rect.top + rect.bottom) / 2 / window.innerHeight;
@@ -161,9 +192,12 @@ function triggerConfetti() {
     }, 400);
 }
 
-function displayKanjiResults() {
-    const correctKanjiList = document.getElementById("correctKanjiList");
-    const incorrectKanjiList = document.getElementById("incorrectKanjiList");
+function displayKanjiResults(
+    correctListId = "correctKanjiList",
+    incorrectListId = "incorrectKanjiList"
+) {
+    const correctKanjiList = document.getElementById(correctListId);
+    const incorrectKanjiList = document.getElementById(incorrectListId);
 
     // Check if multiple modes are selected
     const modesCount =
