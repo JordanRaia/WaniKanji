@@ -304,7 +304,11 @@ function checkAnswer() {
             kanjiHistory[crossModeCheck.otherMode] = raw;
 
             // Show feedback and let user try again
-            let feedbackMessage = `<strong>Wrong mode!</strong> You entered the correct ${modeText} (${crossModeCheck.correctAnswer}) but this question asks for the ${currentModeText}.`;
+            let feedbackMessage = `<strong>Wrong mode!</strong> You entered the correct ${escapeHtml(
+                modeText
+            )} (${escapeHtml(
+                crossModeCheck.correctAnswer
+            )}) but this question asks for the ${escapeHtml(currentModeText)}.`;
 
             // Add romanji hint if it's a reading question
             if (
@@ -314,10 +318,15 @@ function checkAnswer() {
                 const romanjiHint = hiraganaToRomanji(
                     crossModeCheck.correctAnswer
                 );
-                feedbackMessage += `<br><small>Hint: Try typing "${romanjiHint}" for the reading.</small>`;
+                feedbackMessage += `<br><small>Hint: Try typing "${escapeHtml(
+                    romanjiHint
+                )}" for the reading.</small>`;
             }
 
-            document.getElementById("result").innerHTML = feedbackMessage;
+            const resultElement = document.getElementById("result");
+            if (resultElement) {
+                resultElement.innerHTML = feedbackMessage;
+            }
             document.getElementById("result").className = "mb-4 text-warning";
             document.getElementById("result").classList.remove("hidden");
 
@@ -365,10 +374,12 @@ function checkAnswer() {
             }
         }
 
-        document.getElementById("result").innerHTML =
-            "✅ <strong>Correct!</strong>";
-        document.getElementById("result").className = "mb-4 text-success";
-        document.getElementById("result").classList.remove("hidden");
+        const resultElement = document.getElementById("result");
+        if (resultElement) {
+            resultElement.innerHTML = "✅ <strong>Correct!</strong>";
+            resultElement.className = "mb-4 text-success";
+            resultElement.classList.remove("hidden");
+        }
         // remove card from queue
         queue.splice(currentIndex, 1);
         if (currentIndex >= queue.length) currentIndex = 0;
@@ -396,10 +407,13 @@ function checkAnswer() {
         }
 
         // show correct answer and wait for user to continue
-        document.getElementById("result").innerHTML =
-            "❌ <strong>Incorrect</strong>";
-        document.getElementById("result").className = "mb-4 text-error";
-        document.getElementById("result").classList.remove("hidden");
+        const resultElement2 = document.getElementById("result");
+        if (resultElement2) {
+            resultElement2.innerHTML = "❌ <strong>Incorrect</strong>";
+            resultElement2.className = "mb-4 text-error";
+            resultElement2.classList.remove("hidden");
+        }
+
         let correctText;
         if (card.questionType === "kanji-to-reading") {
             correctText = card.readings.join(", ");
@@ -410,14 +424,20 @@ function checkAnswer() {
         } else if (card.questionType === "english-to-reading-or-kanji") {
             correctText = `${card.kanji} or ${card.readings.join(", ")}`;
         }
+
         // show it in a visible box with WaniKani link
         const wanikaniUrl = `https://www.wanikani.com/kanji/${encodeURIComponent(
             card.kanji
         )}`;
-        document.getElementById("correctBox").innerHTML =
-            "<strong>Correct:</strong> " +
-            correctText +
-            `<br><a href="${wanikaniUrl}" target="_blank" class="link link-primary text-sm mt-2 inline-block">View on WaniKani →</a>`;
+        const correctBoxElement = document.getElementById("correctBox");
+        if (correctBoxElement) {
+            correctBoxElement.innerHTML =
+                "<strong>Correct:</strong> " +
+                escapeHtml(correctText) +
+                `<br><a href="${escapeHtml(
+                    wanikaniUrl
+                )}" target="_blank" class="link link-primary text-sm mt-2 inline-block">View on WaniKani →</a>`;
+        }
         document.getElementById("correctBox").classList.remove("hidden");
         // move wrong card to end (so it will reappear later)
         const c = queue.splice(currentIndex, 1)[0];

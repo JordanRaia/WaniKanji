@@ -1,13 +1,66 @@
 // WaniKanji - UI Utilities
 
+/**
+ * Escapes HTML special characters to prevent XSS attacks
+ * Use this for plain text content and HTML attributes
+ */
+function escapeHtml(text) {
+    if (text === null || text === undefined) {
+        return "";
+    }
+    const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+    };
+    return String(text).replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
+ * Sanitizes HTML content using DOMPurify
+ * Use this when you need to preserve safe HTML formatting
+ */
+function sanitizeHtml(html) {
+    if (html === null || html === undefined) {
+        return "";
+    }
+    return DOMPurify.sanitize(html);
+}
+
+/**
+ * Safely sets innerHTML with sanitization
+ * Returns true if element exists and was set, false otherwise
+ */
+function safeSetInnerHTML(element, content, useSanitize = true) {
+    if (!element) {
+        console.warn("Element not found for safeSetInnerHTML");
+        return false;
+    }
+    if (useSanitize) {
+        element.innerHTML = sanitizeHtml(content);
+    } else {
+        element.textContent = content;
+    }
+    return true;
+}
+
 // Toast notification function
 function showToast(message, type = "success") {
     const toastContainer = document.getElementById("toast-container");
+    if (!toastContainer) {
+        console.warn("Toast container not found");
+        return;
+    }
+
     const toastId = "toast-" + Date.now();
+    const escapedMessage = escapeHtml(message);
+    const escapedType = escapeHtml(type);
 
     const toastHTML = `
-        <div id="${toastId}" class="alert alert-${type}">
-            <span>${message}</span>
+        <div id="${toastId}" class="alert alert-${escapedType}">
+            <span>${escapedMessage}</span>
         </div>
     `;
 
@@ -143,16 +196,20 @@ function displayKanjiResults() {
                             ? kanjiData.meanings.join(", ")
                             : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-success/20 rounded text-xs">
-                            <span class="font-bold">${kanji}</span>
-                            <span class="text-base-content/70"> ${meanings}</span>
+                            <span class="font-bold">${escapeHtml(kanji)}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                meanings
+                            )}</span>
                         </div>`;
                     } else if (questionType === "kanji-to-reading") {
                         const readings = kanjiData
                             ? kanjiData.readings.join(", ")
                             : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-success/20 rounded text-xs">
-                            <span class="font-bold">${kanji}</span>
-                            <span class="text-base-content/70"> ${readings}</span>
+                            <span class="font-bold">${escapeHtml(kanji)}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                readings
+                            )}</span>
                         </div>`;
                     } else if (questionType === "english-to-reading-or-kanji") {
                         const meaning =
@@ -160,8 +217,12 @@ function displayKanjiResults() {
                                 ? kanjiData.meanings[0]
                                 : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-success/20 rounded text-xs">
-                            <span class="font-bold">${meaning}</span>
-                            <span class="text-base-content/70"> ${kanji}</span>
+                            <span class="font-bold">${escapeHtml(
+                                meaning
+                            )}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                kanji
+                            )}</span>
                         </div>`;
                     }
                 })
@@ -187,16 +248,20 @@ function displayKanjiResults() {
                             ? kanjiData.meanings.join(", ")
                             : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-error/20 rounded text-xs">
-                            <span class="font-bold">${kanji}</span>
-                            <span class="text-base-content/70"> ${meanings}</span>
+                            <span class="font-bold">${escapeHtml(kanji)}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                meanings
+                            )}</span>
                         </div>`;
                     } else if (questionType === "kanji-to-reading") {
                         const readings = kanjiData
                             ? kanjiData.readings.join(", ")
                             : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-error/20 rounded text-xs">
-                            <span class="font-bold">${kanji}</span>
-                            <span class="text-base-content/70"> ${readings}</span>
+                            <span class="font-bold">${escapeHtml(kanji)}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                readings
+                            )}</span>
                         </div>`;
                     } else if (questionType === "english-to-reading-or-kanji") {
                         const meaning =
@@ -204,8 +269,12 @@ function displayKanjiResults() {
                                 ? kanjiData.meanings[0]
                                 : "";
                         return `<div class="inline-block mr-2 mb-1 p-1 bg-error/20 rounded text-xs">
-                            <span class="font-bold">${meaning}</span>
-                            <span class="text-base-content/70"> ${kanji}</span>
+                            <span class="font-bold">${escapeHtml(
+                                meaning
+                            )}</span>
+                            <span class="text-base-content/70"> ${escapeHtml(
+                                kanji
+                            )}</span>
                         </div>`;
                     }
                 })
@@ -233,11 +302,15 @@ function displayKanjiResults() {
                         ? kanjiData.readings.join(", ")
                         : "";
                     return `<div class="inline-block mr-2 mb-1 p-1 bg-success/20 rounded text-xs">
-                        <span class="font-bold">${kanji}</span>
-                        <span class="text-base-content/70">${meanings}</span>
+                        <span class="font-bold">${escapeHtml(kanji)}</span>
+                        <span class="text-base-content/70">${escapeHtml(
+                            meanings
+                        )}</span>
                         ${
                             readings
-                                ? `<br><span class="text-base-content/60 text-xs">${readings}</span>`
+                                ? `<br><span class="text-base-content/60 text-xs">${escapeHtml(
+                                      readings
+                                  )}</span>`
                                 : ""
                         }
                     </div>`;
@@ -262,11 +335,15 @@ function displayKanjiResults() {
                         ? kanjiData.readings.join(", ")
                         : "";
                     return `<div class="inline-block mr-2 mb-1 p-1 bg-error/20 rounded text-xs">
-                        <span class="font-bold">${kanji}</span>
-                        <span class="text-base-content/70">${meanings}</span>
+                        <span class="font-bold">${escapeHtml(kanji)}</span>
+                        <span class="text-base-content/70">${escapeHtml(
+                            meanings
+                        )}</span>
                         ${
                             readings
-                                ? `<br><span class="text-base-content/60 text-xs">${readings}</span>`
+                                ? `<br><span class="text-base-content/60 text-xs">${escapeHtml(
+                                      readings
+                                  )}</span>`
                                 : ""
                         }
                     </div>`;

@@ -2,7 +2,9 @@
 
 // Function to check if answer would be correct in opposite mode
 function checkCrossModeValidation(card, userAnswer) {
-    if (!card || !userAnswer.trim()) return null;
+    if (!card || !userAnswer.trim()) {
+        return null;
+    }
 
     const normalizedAnswer = normalize(userAnswer);
 

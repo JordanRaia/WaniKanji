@@ -11,6 +11,57 @@
             type="text/css"
         />
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            /* WaniKani-style badges for mnemonics using DaisyUI theme colors */
+            .radical,
+            radical {
+                background-color: oklch(var(--in));
+                color: oklch(var(--inc));
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 500;
+                display: inline-block;
+                margin: 0 2px;
+            }
+
+            .kanji,
+            kanji {
+                background-color: oklch(var(--s));
+                color: oklch(var(--sc));
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 500;
+                display: inline-block;
+                margin: 0 2px;
+            }
+
+            .vocabulary,
+            vocabulary {
+                background-color: oklch(var(--a));
+                color: oklch(var(--ac));
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 500;
+                display: inline-block;
+                margin: 0 2px;
+            }
+
+            .reading,
+            reading {
+                background-color: oklch(var(--b3));
+                color: oklch(var(--bc));
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 500;
+                display: inline-block;
+                margin: 0 2px;
+            }
+
+            .ja,
+            ja {
+                font-style: normal;
+            }
+        </style>
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     </head>
     <body class="bg-base-200 min-h-screen">
@@ -184,7 +235,13 @@
                                 Start Quiz with All
                             </button>
                             <button id="selectKanjiBtn" class="btn btn-info">
-                                Select Kanji
+                                Select Kanji for Quiz
+                            </button>
+                            <button
+                                id="selectLessonBtn"
+                                class="btn btn-warning"
+                            >
+                                Select Kanji for Lessons
                             </button>
                         </div>
                         <div id="setupMsg" class="text-sm text-error"></div>
@@ -240,6 +297,278 @@
                                 class="btn btn-primary"
                             >
                                 Start Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lessonSelectionArea" class="hidden mt-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-2xl mb-4">
+                            Select Kanji for Lessons
+                        </h2>
+
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-sm text-base-content/70">
+                                <span id="lessonSelectedCount">0</span> /
+                                <span id="lessonTotalKanjiCount">0</span> kanji
+                                selected
+                            </div>
+                            <div class="flex gap-2">
+                                <button
+                                    id="lessonSelectAllBtn"
+                                    class="btn btn-sm btn-outline"
+                                >
+                                    Select All
+                                </button>
+                                <button
+                                    id="lessonDeselectAllBtn"
+                                    class="btn btn-sm btn-outline"
+                                >
+                                    Deselect All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            id="lessonKanjiGrid"
+                            class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-3 mb-6 max-h-96 overflow-y-auto p-4 bg-base-200 rounded-lg"
+                        >
+                            <!-- Kanji checkboxes will be populated here -->
+                        </div>
+
+                        <div class="card-actions justify-between">
+                            <button
+                                id="backToSetupFromLessonSelection"
+                                class="btn btn-outline"
+                            >
+                                ← Back to Setup
+                            </button>
+                            <button
+                                id="startLessonsBtn"
+                                class="btn btn-warning"
+                            >
+                                Start Lessons
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lessonArea" class="hidden mt-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <div
+                            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6"
+                        >
+                            <div>
+                                <div
+                                    class="text-2xl font-bold text-warning"
+                                    id="lessonProgress"
+                                >
+                                    Lesson 1 / 1
+                                </div>
+                                <div class="text-sm text-base-content/70">
+                                    Use ← → or Enter to navigate
+                                </div>
+                            </div>
+                            <button
+                                id="backToSetupFromLesson"
+                                class="btn btn-outline btn-sm"
+                            >
+                                ← Back to Setup
+                            </button>
+                        </div>
+
+                        <!-- Loading Skeleton -->
+                        <div id="lessonLoadingSkeleton" class="hidden">
+                            <div class="text-center mb-8">
+                                <div
+                                    class="skeleton h-32 w-32 mx-auto mb-4"
+                                ></div>
+                                <div class="skeleton h-4 w-32 mx-auto"></div>
+                            </div>
+                            <div class="space-y-6">
+                                <div
+                                    class="card bg-success/10 border border-success/20"
+                                >
+                                    <div class="card-body">
+                                        <div
+                                            class="skeleton h-6 w-24 mb-3"
+                                        ></div>
+                                        <div
+                                            class="skeleton h-6 w-full mb-2"
+                                        ></div>
+                                        <div class="skeleton h-20 w-full"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="card bg-primary/10 border border-primary/20"
+                                >
+                                    <div class="card-body">
+                                        <div
+                                            class="skeleton h-6 w-24 mb-3"
+                                        ></div>
+                                        <div
+                                            class="skeleton h-6 w-full mb-2"
+                                        ></div>
+                                        <div class="skeleton h-20 w-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lesson Content -->
+                        <div id="lessonContent">
+                            <div class="text-center mb-8">
+                                <div
+                                    class="text-6xl sm:text-7xl lg:text-9xl text-white mb-4"
+                                    id="lessonKanjiDisplay"
+                                ></div>
+                                <a
+                                    id="lessonWanikaniLink"
+                                    href="#"
+                                    target="_blank"
+                                    class="link link-primary text-sm"
+                                >
+                                    View on WaniKani →
+                                </a>
+                            </div>
+
+                            <div class="space-y-6">
+                                <!-- Meaning Section -->
+                                <div
+                                    class="card bg-success/10 border border-success/20"
+                                >
+                                    <div class="card-body">
+                                        <h3
+                                            class="card-title text-success text-lg mb-2"
+                                        >
+                                            Meaning
+                                        </h3>
+                                        <div
+                                            id="lessonMeanings"
+                                            class="text-xl font-semibold mb-3"
+                                        ></div>
+                                        <div
+                                            id="lessonMeaningMnemonic"
+                                            class="text-base-content/80 leading-relaxed"
+                                        ></div>
+                                    </div>
+                                </div>
+
+                                <!-- Reading Section -->
+                                <div
+                                    class="card bg-primary/10 border border-primary/20"
+                                >
+                                    <div class="card-body">
+                                        <h3
+                                            class="card-title text-primary text-lg mb-2"
+                                        >
+                                            Reading
+                                        </h3>
+                                        <div
+                                            id="lessonReadings"
+                                            class="text-xl font-semibold mb-3"
+                                        ></div>
+                                        <div
+                                            id="lessonReadingMnemonic"
+                                            class="text-base-content/80 leading-relaxed"
+                                        ></div>
+                                    </div>
+                                </div>
+
+                                <!-- Radicals and Visually Similar Kanji - Side by Side -->
+                                <div
+                                    id="similarAndRadicalsContainer"
+                                    class="grid grid-cols-1 lg:grid-cols-2 gap-4 hidden"
+                                >
+                                    <!-- Component Radicals Section -->
+                                    <div
+                                        id="componentRadicalsSection"
+                                        class="card bg-info/10 border border-info/20 hidden"
+                                    >
+                                        <div class="card-body">
+                                            <h3
+                                                class="card-title text-info text-lg mb-2"
+                                            >
+                                                Radicals
+                                            </h3>
+                                            <div
+                                                id="componentRadicals"
+                                                class="flex flex-wrap gap-3"
+                                            ></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Visually Similar Kanji Section -->
+                                    <div
+                                        id="visuallySimilarSection"
+                                        class="card bg-info/10 border border-info/20 hidden"
+                                    >
+                                        <div class="card-body">
+                                            <h3
+                                                class="card-title text-info text-lg mb-2"
+                                            >
+                                                Visually Similar Kanji
+                                            </h3>
+                                            <div
+                                                id="visuallySimilarKanji"
+                                                class="flex flex-wrap gap-3"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between mt-6">
+                                <button
+                                    id="previousLessonBtn"
+                                    class="btn btn-outline"
+                                >
+                                    ← Previous
+                                </button>
+                                <button
+                                    id="nextLessonBtn"
+                                    class="btn btn-primary"
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lessonCompletionArea" class="hidden mt-6">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body text-center">
+                        <h2 class="card-title text-3xl mb-4 justify-center">
+                            Lessons Complete!
+                        </h2>
+
+                        <p class="text-lg text-base-content/70 mb-6">
+                            You've finished all
+                            <span id="completedLessonCount" class="font-bold"
+                                >0</span
+                            >
+                            lessons. Ready to test your knowledge?
+                        </p>
+
+                        <div class="card-actions justify-center gap-2">
+                            <button
+                                id="startQuizFromLessons"
+                                class="btn btn-success btn-lg"
+                            >
+                                Quiz These Kanji
+                            </button>
+                            <button
+                                id="backToSetupFromLessonCompletion"
+                                class="btn btn-outline btn-lg"
+                            >
+                                Back to Setup
                             </button>
                         </div>
                     </div>
@@ -457,11 +786,15 @@
         <!-- Toast container -->
         <div id="toast-container" class="toast toast-top toast-end"></div>
 
+        <!-- Load DOMPurify for HTML sanitization -->
+        <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+
         <!-- Load JavaScript modules -->
         <script src="js/romanji-converter.js"></script>
         <script src="js/api.js"></script>
         <script src="js/cross-mode-validation.js"></script>
         <script src="js/quiz-core.js"></script>
+        <script src="js/lesson-core.js"></script>
         <script src="js/ui-utils.js"></script>
         <script src="js/event-handlers.js"></script>
     </body>

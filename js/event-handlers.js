@@ -144,12 +144,13 @@ document.getElementById("answer").addEventListener("input", (e) => {
 // Global keydown listener for when input is disabled
 document.addEventListener("keydown", (e) => {
     // Only handle if not typing in the input field
-    if (e.target !== document.getElementById("answer")) {
-        if (e.key === "Enter" && awaitingContinue) {
-            // If waiting for continue and Enter is pressed, trigger continue
-            e.preventDefault();
-            document.getElementById("continueBtn").click();
-        }
+    if (
+        e.target !== document.getElementById("answer") &&
+        e.key === "Enter" &&
+        awaitingContinue
+    ) {
+        e.preventDefault();
+        document.getElementById("continueBtn").click();
     }
 });
 
@@ -276,16 +277,16 @@ function showKanjiSelectionScreen(items) {
         const kanjiItem = document.createElement("label");
         kanjiItem.className =
             "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";
-        kanjiItem.title = `${item.meanings.join(", ")} | ${item.readings.join(
-            ", "
-        )}`;
+        kanjiItem.title = `${escapeHtml(
+            item.meanings.join(", ")
+        )} | ${escapeHtml(item.readings.join(", "))}`;
 
         kanjiItem.innerHTML = `
             <input type="checkbox" 
                    class="checkbox checkbox-sm kanji-checkbox" 
-                   data-kanji-id="${item.id}" 
+                   data-kanji-id="${escapeHtml(String(item.id))}" 
                    checked />
-            <span class="text-2xl mt-1">${item.kanji}</span>
+            <span class="text-2xl mt-1">${escapeHtml(item.kanji)}</span>
         `;
 
         kanjiGrid.appendChild(kanjiItem);
@@ -313,11 +314,14 @@ function updateSelectedCount() {
 function resetSetupButtons() {
     const startBtn = document.getElementById("startAllBtn");
     const selectBtn = document.getElementById("selectKanjiBtn");
+    const lessonBtn = document.getElementById("selectLessonBtn");
 
     startBtn.disabled = false;
     selectBtn.disabled = false;
+    lessonBtn.disabled = false;
     startBtn.textContent = "Start Quiz with All";
-    selectBtn.textContent = "Select Kanji";
+    selectBtn.textContent = "Select Kanji for Quiz";
+    lessonBtn.textContent = "Select Kanji for Lessons";
 }
 
 // Select All button handler
@@ -461,6 +465,7 @@ function updateLoadButtonState() {
     );
     const startAllBtn = document.getElementById("startAllBtn");
     const selectKanjiBtn = document.getElementById("selectKanjiBtn");
+    const selectLessonBtn = document.getElementById("selectLessonBtn");
     const setupMsg = document.getElementById("setupMsg");
 
     const allUnchecked =
@@ -471,7 +476,8 @@ function updateLoadButtonState() {
     if (allUnchecked) {
         startAllBtn.disabled = true;
         selectKanjiBtn.disabled = true;
-        setupMsg.textContent = "Please select at least one mode to start.";
+        // Lesson button is always enabled regardless of mode toggles
+        setupMsg.textContent = "Please select at least one mode to start quiz.";
         setupMsg.className = "text-sm text-warning";
     } else {
         startAllBtn.disabled = false;
@@ -499,3 +505,138 @@ document
 document.addEventListener("DOMContentLoaded", () => {
     updateLoadButtonState();
 });
+
+// Select Kanji for Lessons button handler
+document
+    .getElementById("selectLessonBtn")
+    .addEventListener("click", async () => {
+        const startBtn = document.getElementById("startAllBtn");
+        const selectBtn = document.getElementById("selectKanjiBtn");
+        const lessonBtn = document.getElementById("selectLessonBtn");
+
+        // Disable buttons while loading
+        startBtn.disabled = true;
+        selectBtn.disabled = true;
+        lessonBtn.disabled = true;
+        lessonBtn.textContent = "Loading...";
+
+        const items = await loadKanjiFromAPI();
+
+        if (items) {
+            showLessonSelectionScreen(items);
+        } else {
+            // Re-enable buttons if loading failed
+            startBtn.disabled = false;
+            selectBtn.disabled = false;
+            lessonBtn.disabled = false;
+            lessonBtn.textContent = "Select Kanji for Lessons";
+        }
+    });
+
+// Lesson Select All button handler
+document.getElementById("lessonSelectAllBtn").addEventListener("click", () => {
+    document.querySelectorAll(".lesson-kanji-checkbox").forEach((checkbox) => {
+        checkbox.checked = true;
+    });
+    updateLessonSelectedCount();
+});
+
+// Lesson Deselect All button handler
+document
+    .getElementById("lessonDeselectAllBtn")
+    .addEventListener("click", () => {
+        document
+            .querySelectorAll(".lesson-kanji-checkbox")
+            .forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+        updateLessonSelectedCount();
+    });
+
+// Back to Setup from Lesson Selection button handler
+document
+    .getElementById("backToSetupFromLessonSelection")
+    .addEventListener("click", () => {
+        document.getElementById("lessonSelectionArea").classList.add("hidden");
+        document.getElementById("setup").classList.remove("hidden");
+        resetSetupButtons();
+    });
+
+// Start Lessons button handler
+document
+    .getElementById("startLessonsBtn")
+    .addEventListener("click", async () => {
+        const selectedIds = Array.from(
+            document.querySelectorAll(".lesson-kanji-checkbox:checked")
+        ).map((cb) => parseInt(cb.dataset.kanjiId));
+
+        const items = window.lessonSelectionScreenKanjiItems;
+        const selectedItems = items.filter((item) =>
+            selectedIds.includes(item.id)
+        );
+
+        if (selectedItems.length === 0) {
+            showToast("Please select at least one kanji", "warning");
+            return;
+        }
+
+        const token = document.getElementById("token").value.trim();
+        await startLessons(selectedItems, token);
+    });
+
+// Previous Lesson button handler
+document.getElementById("previousLessonBtn").addEventListener("click", () => {
+    previousLesson();
+});
+
+// Next Lesson button handler
+document.getElementById("nextLessonBtn").addEventListener("click", () => {
+    nextLesson();
+});
+
+// Keyboard navigation for lessons
+document.addEventListener("keydown", (e) => {
+    // Check if lesson area is visible
+    const lessonArea = document.getElementById("lessonArea");
+    if (!lessonArea.classList.contains("hidden")) {
+        if (e.key === "ArrowRight" || e.key === "Enter") {
+            e.preventDefault();
+            nextLesson();
+        } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            previousLesson();
+        }
+    }
+});
+
+// Back to Setup from Lesson button handler
+document
+    .getElementById("backToSetupFromLesson")
+    .addEventListener("click", () => {
+        document.getElementById("lessonArea").classList.add("hidden");
+        document.getElementById("setup").classList.remove("hidden");
+        resetSetupButtons();
+    });
+
+// Quiz These Kanji button handler (from lesson completion)
+document
+    .getElementById("startQuizFromLessons")
+    .addEventListener("click", () => {
+        document.getElementById("lessonCompletionArea").classList.add("hidden");
+        // Store items for "Try Again" functionality
+        lastQuizItems = lessonKanjiData.slice();
+        startQuiz(lessonKanjiData);
+        showToast(
+            `Starting quiz with ${lessonKanjiData.length} kanji from lessons`,
+            "info"
+        );
+    });
+
+// Back to Setup from Lesson Completion button handler
+document
+    .getElementById("backToSetupFromLessonCompletion")
+    .addEventListener("click", () => {
+        document.getElementById("lessonCompletionArea").classList.add("hidden");
+        document.getElementById("setup").classList.remove("hidden");
+        resetSetupButtons();
+    });

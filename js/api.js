@@ -5,7 +5,9 @@ async function fetchUserCurrentLevel(token) {
     const resp = await fetch(url, {
         headers: { Authorization: "Bearer " + token },
     });
-    if (!resp.ok) throw new Error(await resp.text());
+    if (!resp.ok) {
+        throw new Error(await resp.text());
+    }
     const json = await resp.json();
     return json.data.level;
 }
@@ -16,7 +18,9 @@ async function fetchKanjiForLevel(token, level) {
     const resp = await fetch(url, {
         headers: { Authorization: "Bearer " + token },
     });
-    if (!resp.ok) throw new Error(await resp.text());
+    if (!resp.ok) {
+        throw new Error(await resp.text());
+    }
     const json = await resp.json();
     return json.data.map((s) => {
         return {
@@ -24,6 +28,12 @@ async function fetchKanjiForLevel(token, level) {
             kanji: s.data.characters || "",
             meanings: s.data.meanings.map((m) => m.meaning),
             readings: s.data.readings.map((r) => r.reading),
+            meaning_mnemonic: s.data.meaning_mnemonic || "",
+            reading_mnemonic: s.data.reading_mnemonic || "",
+            visually_similar_subject_ids:
+                s.data.visually_similar_subject_ids || [],
+            component_subject_ids: s.data.component_subject_ids || [],
+            document_url: s.data.document_url || "",
         };
     });
 }
@@ -39,7 +49,9 @@ async function fetchAssignmentsForSubjects(token, subjectIds) {
     const resp = await fetch(url, {
         headers: { Authorization: "Bearer " + token },
     });
-    if (!resp.ok) throw new Error(await resp.text());
+    if (!resp.ok) {
+        throw new Error(await resp.text());
+    }
     const json = await resp.json();
 
     // Create a map of subject_id -> srs_stage
@@ -66,7 +78,7 @@ async function fetchKanjiForLevelFilteredBySRS(token, level) {
     // Filter to only include:
     // 1. Kanji not yet unlocked
     // 2. Kanji with SRS stage < 5 (below Guru: Apprentice stages 1-4, Lessons stage 0)
-    const filteredKanji = allKanji.filter((kanji) => {
+    return allKanji.filter((kanji) => {
         const assignment = assignments.get(kanji.id);
 
         // Include if no assignment (never unlocked)
@@ -78,6 +90,30 @@ async function fetchKanjiForLevelFilteredBySRS(token, level) {
         // SRS stages: 0 = Lessons, 1-4 = Apprentice, 5-6 = Guru, 7 = Master, 8 = Enlightened, 9 = Burned
         return assignment.srsStage < 5;
     });
+}
 
-    return filteredKanji;
+async function fetchSubjectsByIds(token, subjectIds) {
+    if (!subjectIds || subjectIds.length === 0) {
+        return [];
+    }
+
+    const base = "https://api.wanikani.com/v2/subjects";
+    const idsParam = subjectIds.join(",");
+    const url = `${base}?ids=${encodeURIComponent(idsParam)}`;
+    const resp = await fetch(url, {
+        headers: { Authorization: "Bearer " + token },
+    });
+    if (!resp.ok) {
+        throw new Error(await resp.text());
+    }
+    const json = await resp.json();
+
+    return json.data.map((s) => {
+        return {
+            id: s.id,
+            type: s.object,
+            kanji: s.data.characters || "",
+            meanings: s.data.meanings.map((m) => m.meaning),
+        };
+    });
 }
