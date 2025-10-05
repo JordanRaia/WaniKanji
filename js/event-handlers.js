@@ -19,24 +19,67 @@ async function loadKanjiFromAPI() {
     }
 
     try {
-        // Fetch kanji based on SRS filter
-        let items = useSrsFilter
-            ? await fetchKanjiForLevelFilteredBySRS(token, level)
-            : await fetchKanjiForLevel(token, level);
+        // Check if we can use cached data
+        const hasCachedData =
+            typeof cachedKanjiData !== "undefined" &&
+            cachedKanjiData.token === token &&
+            cachedKanjiData.level === level &&
+            cachedKanjiData.allKanji &&
+            cachedKanjiData.allKanji.length > 0;
 
-        // Apply unlocked-only filter if checked
-        if (unlockedOnly && items.length > 0) {
-            const subjectIds = items.map((k) => k.id);
-            const assignments = await fetchAssignmentsForSubjects(
-                token,
-                subjectIds
-            );
+        let items;
 
-            // Filter to only include unlocked kanji
-            items = items.filter((kanji) => {
-                const assignment = assignments.get(kanji.id);
-                return assignment && assignment.unlocked;
-            });
+        if (hasCachedData) {
+            // Use cached data and apply filters client-side
+            items = cachedKanjiData.allKanji;
+
+            // Apply SRS filter
+            if (useSrsFilter) {
+                items = items.filter((kanji) => {
+                    // Safe access to assignments Map
+                    if (!(cachedKanjiData.assignments instanceof Map)) {
+                        return true; // Include if no valid assignment data
+                    }
+                    const assignment = cachedKanjiData.assignments.get(
+                        kanji.id
+                    );
+                    return !assignment || assignment.srsStage < 5;
+                });
+            }
+
+            // Apply unlocked-only filter
+            if (unlockedOnly) {
+                items = items.filter((kanji) => {
+                    // Safe access to assignments Map
+                    if (!(cachedKanjiData.assignments instanceof Map)) {
+                        return false; // Exclude if no valid assignment data
+                    }
+                    const assignment = cachedKanjiData.assignments.get(
+                        kanji.id
+                    );
+                    return assignment && assignment.unlocked;
+                });
+            }
+        } else {
+            // Fallback to API calls if no cached data
+            items = useSrsFilter
+                ? await fetchKanjiForLevelFilteredBySRS(token, level)
+                : await fetchKanjiForLevel(token, level);
+
+            // Apply unlocked-only filter if checked
+            if (unlockedOnly && items.length > 0) {
+                const subjectIds = items.map((k) => k.id);
+                const assignments = await fetchAssignmentsForSubjects(
+                    token,
+                    subjectIds
+                );
+
+                // Filter to only include unlocked kanji
+                items = items.filter((kanji) => {
+                    const assignment = assignments.get(kanji.id);
+                    return assignment && assignment.unlocked;
+                });
+            }
         }
 
         if (!items.length) {
@@ -62,7 +105,7 @@ async function loadKanjiFromAPI() {
     }
 }
 
-// Start Quiz with All button handler
+// Quick Quiz button handler
 document.getElementById("startAllBtn").addEventListener("click", async () => {
     const startBtn = document.getElementById("startAllBtn");
     const selectBtn = document.getElementById("selectKanjiBtn");
@@ -83,7 +126,7 @@ document.getElementById("startAllBtn").addEventListener("click", async () => {
         // Re-enable buttons if loading failed
         startBtn.disabled = false;
         selectBtn.disabled = false;
-        startBtn.textContent = "Start Quiz with All";
+        startBtn.textContent = "Quick Quiz";
     }
 });
 
@@ -323,10 +366,10 @@ function resetSetupButtons() {
     selectBtn.disabled = false;
     lessonBtn.disabled = false;
     learnBtn.disabled = false;
-    startBtn.textContent = "Start Quiz with All";
-    selectBtn.textContent = "Select Kanji for Quiz";
-    lessonBtn.textContent = "Select Kanji for Lessons";
-    learnBtn.textContent = "Learn Kanji";
+    startBtn.textContent = "Quick Quiz";
+    selectBtn.textContent = "Custom Quiz";
+    lessonBtn.textContent = "Lessons";
+    learnBtn.textContent = "Learn";
 }
 
 // Select All button handler
@@ -395,38 +438,120 @@ async function loadApiKey() {
         document.getElementById("token").value = savedKey;
         // Auto-load current level when loading saved API key
         try {
-            // Show skeleton while loading and disable buttons
-            document.getElementById("levelSkeleton").classList.remove("hidden");
-            document.getElementById("level").classList.add("hidden");
+            // Skeleton already visible, just disable API-related buttons
             document.getElementById("startAllBtn").disabled = true;
             document.getElementById("selectKanjiBtn").disabled = true;
+            document.getElementById("selectLessonBtn").disabled = true;
             document.getElementById("learnKanjiBtn").disabled = true;
-            document.getElementById("modeToggle").disabled = true;
-            document.getElementById("readingToggle").disabled = true;
 
             const currentLevel = await fetchUserCurrentLevel(savedKey);
             document.getElementById("level").value = currentLevel;
+            document.getElementById(
+                "levelDisplay"
+            ).textContent = `Level ${currentLevel}`;
+
+            // Clear any previous error messages
+            document.getElementById("setupMsg").textContent = "";
+
+            // Don't hide loading state yet - let updateKanjiCountAndPreview handle it
+
             showToast(`Selected current level: ${currentLevel}`, "success");
         } catch (error) {
             document.getElementById("setupMsg").textContent =
                 "Could not load current level: " + error.message;
             // Default to level 1 if loading fails
             document.getElementById("level").value = 1;
+            document.getElementById("levelDisplay").textContent = "Level 1";
+
+            // Hide loading state
+            if (typeof hideLoadingState === "function") {
+                hideLoadingState();
+            }
         } finally {
-            // Hide skeleton, show input, and re-enable buttons
+            // Hide skeleton, show input
             document.getElementById("levelSkeleton").classList.add("hidden");
             document.getElementById("level").classList.remove("hidden");
-            document.getElementById("startAllBtn").disabled = false;
-            document.getElementById("selectKanjiBtn").disabled = false;
-            document.getElementById("learnKanjiBtn").disabled = false;
+
+            // Re-enable all basic controls
+            document.getElementById("level").disabled = false;
+            document.getElementById("srsFilterToggle").disabled = false;
+            document.getElementById("unlockedOnlyToggle").disabled = false;
+            document.getElementById("toggleToken").disabled = false;
+            document.getElementById("token").disabled = false;
+            document.getElementById("openFullSelector").disabled = false;
+
+            // Re-enable mode toggles
             document.getElementById("modeToggle").disabled = false;
             document.getElementById("readingToggle").disabled = false;
+            document.getElementById(
+                "modeEnglishToKanjiToggle"
+            ).disabled = false;
+
+            // Re-enable mode buttons (the visual button elements)
+            document.querySelectorAll("[data-mode]").forEach((btn) => {
+                btn.disabled = false;
+            });
+
+            // Re-enable lesson and learn buttons
+            document.getElementById("selectLessonBtn").disabled = false;
+            document.getElementById("learnKanjiBtn").disabled = false;
+
+            // Preload kanji data after level is loaded
+            if (typeof preloadKanjiData === "function") {
+                preloadKanjiData();
+            }
+
+            // Check if quiz buttons should be enabled based on mode toggles
+            if (typeof updateLoadButtonState === "function") {
+                updateLoadButtonState();
+            }
         }
+    } else {
+        // No saved token - hide loading state and show default values
+        document.getElementById("levelSkeleton").classList.add("hidden");
+        document.getElementById("level").classList.remove("hidden");
+        document.getElementById("level").value = 1;
+        document.getElementById("levelDisplay").textContent = "Level 1";
+
+        if (typeof hideLoadingState === "function") {
+            hideLoadingState();
+        }
+
+        document.getElementById("kanjiCountDisplay").textContent = "—";
+
+        if (typeof clearPreviewGrid === "function") {
+            clearPreviewGrid();
+        }
+
+        // Re-enable all controls after initial load
+        document.getElementById("level").disabled = false;
+        document.getElementById("srsFilterToggle").disabled = false;
+        document.getElementById("unlockedOnlyToggle").disabled = false;
+        document.getElementById("modeToggle").disabled = false;
+        document.getElementById("readingToggle").disabled = false;
+        document.getElementById("modeEnglishToKanjiToggle").disabled = false;
+        document.getElementById("toggleToken").disabled = false;
+        document.getElementById("token").disabled = false;
+        document.getElementById("openFullSelector").disabled = false;
+
+        // Re-enable mode buttons (the visual button elements)
+        document.querySelectorAll("[data-mode]").forEach((btn) => {
+            btn.disabled = false;
+        });
+
+        // Re-enable lesson and learn buttons (always enabled)
+        document.getElementById("selectLessonBtn").disabled = false;
+        document.getElementById("learnKanjiBtn").disabled = false;
+
+        // Note: Quiz button states will be set by updateLoadButtonState()
+        // which is called from hideLoadingState() after isInitialLoad is set to false
     }
 }
 
-// Load saved API key on page load
-loadApiKey();
+// Load saved API key on page load (after DOM is ready)
+document.addEventListener("DOMContentLoaded", () => {
+    loadApiKey();
+});
 
 // Save API key when it changes and auto-load current level
 document.getElementById("token").addEventListener("input", async (e) => {
@@ -436,31 +561,81 @@ document.getElementById("token").addEventListener("input", async (e) => {
         // Basic validation for API token
         try {
             // Show skeleton while loading and disable buttons
+            if (typeof showLoadingState === "function") {
+                showLoadingState();
+            }
+            if (typeof showPreviewSkeleton === "function") {
+                showPreviewSkeleton();
+            }
+
             document.getElementById("levelSkeleton").classList.remove("hidden");
             document.getElementById("level").classList.add("hidden");
             document.getElementById("startAllBtn").disabled = true;
             document.getElementById("selectKanjiBtn").disabled = true;
+            document.getElementById("selectLessonBtn").disabled = true;
             document.getElementById("learnKanjiBtn").disabled = true;
-            document.getElementById("modeToggle").disabled = true;
-            document.getElementById("readingToggle").disabled = true;
 
             const currentLevel = await fetchUserCurrentLevel(token);
             document.getElementById("level").value = currentLevel;
+            document.getElementById(
+                "levelDisplay"
+            ).textContent = `Level ${currentLevel}`;
+
+            // Clear any previous error messages
+            document.getElementById("setupMsg").textContent = "";
+
+            // Don't hide loading state yet - let updateKanjiCountAndPreview handle it
+
             showToast(`Loaded current level: ${currentLevel}`, "success");
         } catch (error) {
             document.getElementById("setupMsg").textContent =
                 "Could not load current level: " + error.message;
             // Default to level 1 if loading fails
             document.getElementById("level").value = 1;
+            document.getElementById("levelDisplay").textContent = "Level 1";
+
+            // Hide loading state
+            if (typeof hideLoadingState === "function") {
+                hideLoadingState();
+            }
         } finally {
-            // Hide skeleton, show input, and re-enable buttons
+            // Hide skeleton, show input
             document.getElementById("levelSkeleton").classList.add("hidden");
             document.getElementById("level").classList.remove("hidden");
-            document.getElementById("startAllBtn").disabled = false;
-            document.getElementById("selectKanjiBtn").disabled = false;
-            document.getElementById("learnKanjiBtn").disabled = false;
+
+            // Re-enable all basic controls
+            document.getElementById("level").disabled = false;
+            document.getElementById("srsFilterToggle").disabled = false;
+            document.getElementById("unlockedOnlyToggle").disabled = false;
+            document.getElementById("toggleToken").disabled = false;
+            document.getElementById("token").disabled = false;
+            document.getElementById("openFullSelector").disabled = false;
+
+            // Re-enable mode toggles
             document.getElementById("modeToggle").disabled = false;
             document.getElementById("readingToggle").disabled = false;
+            document.getElementById(
+                "modeEnglishToKanjiToggle"
+            ).disabled = false;
+
+            // Re-enable mode buttons (the visual button elements)
+            document.querySelectorAll("[data-mode]").forEach((btn) => {
+                btn.disabled = false;
+            });
+
+            // Re-enable lesson and learn buttons (they don't depend on mode toggles)
+            document.getElementById("selectLessonBtn").disabled = false;
+            document.getElementById("learnKanjiBtn").disabled = false;
+
+            // Preload kanji data after level is loaded
+            if (typeof preloadKanjiData === "function") {
+                preloadKanjiData();
+            }
+
+            // Check if quiz buttons should be enabled based on mode toggles
+            if (typeof updateLoadButtonState === "function") {
+                updateLoadButtonState();
+            }
         }
     }
 });
@@ -470,6 +645,11 @@ document.addEventListener("DOMContentLoaded", applyColorConfig);
 
 // Check if all mode checkboxes are unchecked and disable buttons
 function updateLoadButtonState() {
+    // Don't update button state if we're still in initial load
+    if (typeof isInitialLoad !== "undefined" && isInitialLoad) {
+        return;
+    }
+
     const meaningToggle = document.getElementById("modeToggle");
     const readingToggle = document.getElementById("readingToggle");
     const modeEnglishToKanjiToggle = document.getElementById(
@@ -477,8 +657,6 @@ function updateLoadButtonState() {
     );
     const startAllBtn = document.getElementById("startAllBtn");
     const selectKanjiBtn = document.getElementById("selectKanjiBtn");
-    const selectLessonBtn = document.getElementById("selectLessonBtn");
-    const learnKanjiBtn = document.getElementById("learnKanjiBtn");
     const setupMsg = document.getElementById("setupMsg");
 
     const allUnchecked =
@@ -486,6 +664,7 @@ function updateLoadButtonState() {
         !readingToggle.checked &&
         !modeEnglishToKanjiToggle.checked;
 
+    // Only disable quiz-related buttons when no modes are selected
     if (allUnchecked) {
         startAllBtn.disabled = true;
         selectKanjiBtn.disabled = true;
@@ -518,7 +697,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLoadButtonState();
 });
 
-// Select Kanji for Lessons button handler
+// Lessons button handler
 document
     .getElementById("selectLessonBtn")
     .addEventListener("click", async () => {
@@ -541,7 +720,7 @@ document
             startBtn.disabled = false;
             selectBtn.disabled = false;
             lessonBtn.disabled = false;
-            lessonBtn.textContent = "Select Kanji for Lessons";
+            lessonBtn.textContent = "Lessons";
         }
     });
 
@@ -674,7 +853,7 @@ document
         resetSetupButtons();
     });
 
-// Learn Kanji button handler
+// Learn Mode button handler
 document.getElementById("learnKanjiBtn").addEventListener("click", async () => {
     const startBtn = document.getElementById("startAllBtn");
     const selectBtn = document.getElementById("selectKanjiBtn");
@@ -698,11 +877,11 @@ document.getElementById("learnKanjiBtn").addEventListener("click", async () => {
         selectBtn.disabled = false;
         lessonBtn.disabled = false;
         learnBtn.disabled = false;
-        learnBtn.textContent = "Learn Kanji";
+        learnBtn.textContent = "Learn";
     }
 });
 
-// Learn Kanji Select All button handler
+// Learn Mode Select All button handler
 document
     .getElementById("learnKanjiSelectAllBtn")
     .addEventListener("click", () => {
@@ -714,7 +893,7 @@ document
         updateLearnKanjiSelectedCount();
     });
 
-// Learn Kanji Deselect All button handler
+// Learn Mode Deselect All button handler
 document
     .getElementById("learnKanjiDeselectAllBtn")
     .addEventListener("click", () => {
@@ -737,7 +916,7 @@ document
         resetSetupButtons();
     });
 
-// Start Learn Kanji button handler
+// Start Learn Mode button handler
 document
     .getElementById("startLearnKanjiBtn")
     .addEventListener("click", async () => {
@@ -789,7 +968,7 @@ document.getElementById("redoLearnQuiz").addEventListener("click", () => {
     redoLearnQuiz();
 });
 
-// Continue Learn Kanji button handler
+// Continue Learn Mode button handler
 document.getElementById("continueLearnKanji").addEventListener("click", () => {
     continueToNextBatch();
 });

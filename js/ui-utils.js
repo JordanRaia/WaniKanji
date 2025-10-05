@@ -77,17 +77,6 @@ function showToast(message, type = "success") {
 
 // Apply color configuration to elements
 function applyColorConfig() {
-    // Apply checkbox colors
-    const meaningCheckbox = document.getElementById("modeToggle");
-    const readingCheckbox = document.getElementById("readingToggle");
-
-    if (meaningCheckbox) {
-        meaningCheckbox.className = `checkbox ${COLOR_CONFIG.meaning.checkbox}`;
-    }
-    if (readingCheckbox) {
-        readingCheckbox.className = `checkbox ${COLOR_CONFIG.reading.checkbox}`;
-    }
-
     // Apply kanji color
     const kanjiDisplay = document.getElementById("kanjiDisplay");
     if (kanjiDisplay) {

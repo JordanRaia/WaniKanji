@@ -61,6 +61,13 @@
             ja {
                 font-style: normal;
             }
+
+            /* Subtle hover for inactive mode buttons */
+            .btn-outline.hover\:bg-base-300:hover {
+                background-color: oklch(var(--b3));
+                border-color: oklch(var(--b3));
+                color: oklch(var(--bc));
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     </head>
@@ -98,174 +105,286 @@
 
             <div class="card bg-base-100 shadow-xl" id="setup">
                 <div class="card-body">
-                    <h2 class="card-title text-2xl mb-4">Setup</h2>
+                    <div class="flex items-start justify-between mb-4">
+                        <h2 class="card-title text-2xl">Setup</h2>
+                        <div
+                            class="text-sm text-base-content/60"
+                            id="availableCount"
+                        >
+                            <span id="levelDisplay" class="hidden"
+                                >Level 1</span
+                            >
+                            <span
+                                id="levelDisplaySkeleton"
+                                class="skeleton w-16 h-4 inline-block"
+                            ></span>
+                            <span class="mx-1">·</span>
+                            <span id="kanjiCountDisplay" class="hidden">—</span>
+                            <span
+                                id="kanjiCountSkeleton"
+                                class="skeleton w-12 h-4 inline-block"
+                            ></span>
+                            <span class="ml-1">kanji</span>
+                        </div>
+                    </div>
 
+                    <!-- Token -->
                     <div class="form-control w-full mb-4">
                         <label class="label">
                             <span class="label-text">WaniKani API Token</span>
-                        </label>
-                        <input
-                            id="token"
-                            type="password"
-                            placeholder="Paste your WaniKani API token here"
-                            class="input input-bordered w-full"
-                        />
-                        <label class="label">
-                            <span class="label-text-alt text-base-content/70"
-                                >Token is saved locally and used only for this
-                                session.</span
+                            <span class="text-xs text-base-content/60"
+                                >Saved locally for this session</span
                             >
                         </label>
-                        <div class="text-sm text-base-content/70 mt-2">
-                            Need a token?
-                            <a
-                                href="https://www.wanikani.com/settings/personal_access_tokens"
-                                target="_blank"
-                                class="link link-primary hover:link-hover"
+                        <div class="flex gap-2 items-center">
+                            <input
+                                id="token"
+                                type="password"
+                                placeholder="Paste your WaniKani API token here"
+                                class="input input-bordered w-full"
+                                aria-label="WaniKani API token"
+                            />
+                            <button
+                                id="toggleToken"
+                                class="btn btn-ghost btn-square"
+                                aria-pressed="false"
+                                title="Show/hide token"
                             >
-                                Get your API token here
-                            </a>
-                            <br />
-                            <span class="text-xs"
-                                >No additional permissions needed. This app only
-                                uses GET requests.</span
-                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                </svg>
+                            </button>
                         </div>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/70">
+                                No additional permissions needed. This app only
+                                uses GET requests.
+                                <a
+                                    href="https://www.wanikani.com/settings/personal_access_tokens"
+                                    target="_blank"
+                                    class="link link-primary ml-1"
+                                    >Get your token</a
+                                >
+                            </span>
+                        </label>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                        <div class="form-control w-full sm:w-32">
+                    <!-- Top row: Level + Modes -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <!-- Level -->
+                        <div class="form-control w-full md:w-40">
                             <label class="label">
                                 <span class="label-text">Level</span>
                             </label>
-                            <div id="levelSkeleton" class="hidden">
+                            <div id="levelSkeleton">
                                 <div class="skeleton h-12 w-full"></div>
                             </div>
-                            <input
+                            <select
                                 id="level"
-                                type="number"
-                                min="1"
-                                max="60"
-                                value="1"
-                                class="input input-bordered"
-                            />
+                                class="select select-bordered hidden"
+                                aria-label="Choose level"
+                            >
+                                <!-- Options 1-60 will be generated by JavaScript -->
+                            </select>
+                            <p class="text-xs text-base-content/60 mt-2">
+                                Auto-detect level when token is validated.
+                            </p>
                         </div>
 
-                        <div class="flex flex-col gap-2 sm:flex-1">
-                            <div class="form-control w-full">
-                                <label
-                                    class="label cursor-pointer justify-start gap-2"
+                        <!-- Mode toggles -->
+                        <div class="flex-1">
+                            <label class="label">
+                                <span class="label-text">Question Types</span>
+                            </label>
+                            <div
+                                class="btn-group w-full"
+                                role="toolbar"
+                                aria-label="Question type toggles"
+                            >
+                                <input
+                                    type="checkbox"
+                                    id="modeToggle"
+                                    data-color-class="meaning"
+                                    checked
+                                    class="hidden"
+                                />
+                                <button
+                                    class="btn btn-outline flex-1"
+                                    data-mode="meaning"
+                                    aria-pressed="true"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        id="modeEnglishToKanjiToggle"
-                                        class="checkbox checkbox-warning"
-                                    />
-                                    <span class="label-text"
-                                        >English Meaning → Japanese
-                                        Reading</span
-                                    >
-                                </label>
-                            </div>
+                                    Kanji → English
+                                </button>
 
-                            <div class="form-control w-full">
-                                <label
-                                    class="label cursor-pointer justify-start gap-2"
+                                <input
+                                    type="checkbox"
+                                    id="readingToggle"
+                                    data-color-class="reading"
+                                    checked
+                                    class="hidden"
+                                />
+                                <button
+                                    class="btn btn-outline flex-1"
+                                    data-mode="reading"
+                                    aria-pressed="true"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        id="modeToggle"
-                                        class="checkbox"
-                                        data-color-class="meaning"
-                                        checked
-                                    />
-                                    <span class="label-text"
-                                        >Kanji → English Meaning</span
-                                    >
-                                </label>
-                            </div>
+                                    Kanji → Reading
+                                </button>
 
-                            <div class="form-control w-full">
+                                <input
+                                    type="checkbox"
+                                    id="modeEnglishToKanjiToggle"
+                                    class="hidden"
+                                />
+                                <button
+                                    class="btn btn-outline flex-1"
+                                    data-mode="eng-to-jn"
+                                    aria-pressed="false"
+                                >
+                                    English → Reading
+                                </button>
+                            </div>
+                            <p class="text-xs text-base-content/60 mt-2">
+                                Select one or more modes. Active options are
+                                filled.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Advanced filters -->
+                    <details
+                        class="collapse collapse-arrow border border-base-300 bg-base-200 rounded-box mb-4"
+                    >
+                        <summary class="collapse-title text-sm font-medium">
+                            Advanced filters
+                        </summary>
+                        <div class="collapse-content">
+                            <div
+                                class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2"
+                            >
                                 <label
-                                    class="label cursor-pointer justify-start gap-2"
+                                    class="flex items-start gap-3 cursor-pointer"
                                 >
                                     <input
                                         type="checkbox"
-                                        id="readingToggle"
-                                        class="checkbox"
-                                        data-color-class="reading"
-                                        checked
+                                        id="srsFilterToggle"
+                                        class="checkbox checkbox-sm checkbox-primary mt-1"
                                     />
-                                    <span class="label-text"
-                                        >Kanji → Japanese Reading</span
-                                    >
+                                    <div>
+                                        <div class="font-medium">
+                                            Exclude Guru+ kanji
+                                        </div>
+                                        <div
+                                            class="text-xs text-base-content/60"
+                                        >
+                                            Filters out kanji at Guru rank or
+                                            higher. Includes never-unlocked
+                                            kanji.
+                                        </div>
+                                    </div>
                                 </label>
+
+                                <label
+                                    class="flex items-start gap-3 cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="unlockedOnlyToggle"
+                                        class="checkbox checkbox-sm checkbox-primary mt-1"
+                                    />
+                                    <div>
+                                        <div class="font-medium">
+                                            Exclude locked kanji
+                                        </div>
+                                        <div
+                                            class="text-xs text-base-content/60"
+                                        >
+                                            Only shows kanji you have unlocked
+                                            in WaniKani. Excludes locked kanji.
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <div
+                                    class="col-span-1 lg:col-span-2 text-xs text-base-content/60"
+                                >
+                                    Tip: Use filters to refine the preview below
+                                    before starting a quiz.
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Kanji preview -->
+                    <div class="mb-4">
+                        <label class="label">
+                            <span class="label-text">Preview</span>
+                        </label>
+                        <div class="card bg-base-200 p-3 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="text-sm text-base-content/70">
+                                    Showing
+                                    <span id="previewCount">0</span> kanji
+                                </div>
+                                <button
+                                    id="openFullSelector"
+                                    class="text-xs text-base-content/60 link link-hover"
+                                >
+                                    Quick preview (click to open full selector)
+                                </button>
+                            </div>
+                            <div
+                                id="previewGrid"
+                                class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 min-h-[72px]"
+                            >
+                                <!-- Kanji preview will be populated here -->
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                        <div class="form-control w-full">
-                            <label
-                                class="label cursor-pointer justify-start gap-2"
-                            >
-                                <input
-                                    type="checkbox"
-                                    id="srsFilterToggle"
-                                    class="checkbox checkbox-info"
-                                />
-                                <span class="label-text"
-                                    >Exclude Guru+ kanji</span
-                                >
-                            </label>
-                            <label class="label">
-                                <span
-                                    class="label-text-alt text-base-content/70"
-                                    >Filters out kanji at Guru rank or higher.
-                                    Includes never-unlocked kanji.</span
-                                >
-                            </label>
-                        </div>
-
-                        <div class="form-control w-full">
-                            <label
-                                class="label cursor-pointer justify-start gap-2"
-                            >
-                                <input
-                                    type="checkbox"
-                                    id="unlockedOnlyToggle"
-                                    class="checkbox checkbox-secondary"
-                                />
-                                <span class="label-text"
-                                    >Exclude locked kanji</span
-                                >
-                            </label>
-                            <label class="label">
-                                <span
-                                    class="label-text-alt text-base-content/70"
-                                    >Only shows kanji you have unlocked in
-                                    WaniKani. Excludes locked kanji.</span
-                                >
-                            </label>
-                        </div>
-                    </div>
-
+                    <!-- Actions -->
                     <div class="card-actions flex-col gap-4">
                         <div class="flex flex-col sm:flex-row gap-2 w-full">
-                            <button id="startAllBtn" class="btn btn-success">
-                                Start Quiz with All
+                            <button
+                                id="startAllBtn"
+                                class="btn btn-outline flex-1"
+                            >
+                                Quiz All
                             </button>
-                            <button id="selectKanjiBtn" class="btn btn-info">
-                                Select Kanji for Quiz
+                            <button
+                                id="selectKanjiBtn"
+                                class="btn btn-outline flex-1"
+                            >
+                                Select Quiz
                             </button>
                             <button
                                 id="selectLessonBtn"
-                                class="btn btn-warning"
+                                class="btn btn-outline flex-1"
                             >
-                                Select Kanji for Lessons
+                                Lessons
                             </button>
-                            <button id="learnKanjiBtn" class="btn btn-accent">
-                                Learn Kanji
+                            <button
+                                id="learnKanjiBtn"
+                                class="btn btn-outline flex-1"
+                            >
+                                Learn
                             </button>
                         </div>
                         <div
@@ -333,9 +452,7 @@
             <div id="lessonSelectionArea" class="hidden mt-6">
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body">
-                        <h2 class="card-title text-2xl mb-4">
-                            Select Kanji for Lessons
-                        </h2>
+                        <h2 class="card-title text-2xl mb-4">Lessons</h2>
 
                         <div class="flex justify-between items-center mb-4">
                             <div class="text-sm text-base-content/70">
@@ -1116,6 +1233,7 @@
         <script src="js/lesson-core.js"></script>
         <script src="js/learn-kanji-core.js"></script>
         <script src="js/ui-utils.js"></script>
+        <script src="js/setup-ui.js"></script>
         <script src="js/event-handlers.js"></script>
     </body>
 </html>

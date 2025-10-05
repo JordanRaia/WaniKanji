@@ -1,6 +1,6 @@
-// WaniKanji - Learn Kanji Core Logic
+// WaniKanji - Learn Mode Core Logic
 
-// Global state for Learn Kanji mode
+// Global state for Learn Mode
 let learnKanjiMode = false; // Track if in learn mode
 let learnKanjiPool = []; // All kanji user selected to learn
 let currentLearnBatch = []; // Current batch of 5
@@ -13,7 +13,7 @@ let learnSelectionScreenKanjiItems = []; // Items loaded for selection screen
 const BATCH_SIZE = 5;
 
 /**
- * Shows the Learn Kanji selection screen
+ * Shows the Learn Mode selection screen
  */
 function showLearnKanjiSelectionScreen(items) {
     learnSelectionScreenKanjiItems = items;
@@ -62,7 +62,7 @@ function showLearnKanjiSelectionScreen(items) {
 }
 
 /**
- * Updates the selected count for Learn Kanji selection screen
+ * Updates the selected count for Learn Mode selection screen
  */
 function updateLearnKanjiSelectedCount() {
     const checked = document.querySelectorAll(".learn-kanji-checkbox:checked");
@@ -75,7 +75,7 @@ function updateLearnKanjiSelectedCount() {
 }
 
 /**
- * Initializes Learn Kanji mode with selected kanji
+ * Initializes Learn Mode with selected kanji
  */
 async function initializeLearnKanjiMode(selectedItems, token) {
     learnKanjiMode = true;

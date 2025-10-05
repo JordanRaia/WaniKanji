@@ -12,11 +12,12 @@ async function fetchUserCurrentLevel(token) {
     return json.data.level;
 }
 
-async function fetchKanjiForLevel(token, level) {
+async function fetchKanjiForLevel(token, level, signal = null) {
     const base = "https://api.wanikani.com/v2/subjects";
     const url = `${base}?types=kanji&levels=${encodeURIComponent(level)}`;
     const resp = await fetch(url, {
         headers: { Authorization: "Bearer " + token },
+        signal: signal,
     });
     if (!resp.ok) {
         throw new Error(await resp.text());
@@ -38,7 +39,7 @@ async function fetchKanjiForLevel(token, level) {
     });
 }
 
-async function fetchAssignmentsForSubjects(token, subjectIds) {
+async function fetchAssignmentsForSubjects(token, subjectIds, signal = null) {
     if (!subjectIds || subjectIds.length === 0) {
         return new Map();
     }
@@ -48,6 +49,7 @@ async function fetchAssignmentsForSubjects(token, subjectIds) {
     const url = `${base}?subject_ids=${encodeURIComponent(idsParam)}`;
     const resp = await fetch(url, {
         headers: { Authorization: "Bearer " + token },
+        signal: signal,
     });
     if (!resp.ok) {
         throw new Error(await resp.text());
