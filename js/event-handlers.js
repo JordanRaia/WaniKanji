@@ -77,7 +77,8 @@ document.getElementById("startAllBtn").addEventListener("click", async () => {
     if (items) {
         // Store items for "Try Again" functionality
         lastQuizItems = items.slice();
-        startQuiz(items);
+        const token = document.getElementById("token").value.trim();
+        await startQuiz(items, token);
     } else {
         // Re-enable buttons if loading failed
         startBtn.disabled = false;
@@ -194,14 +195,15 @@ document.getElementById("backBtn").addEventListener("click", () => {
 });
 
 // Restart button functionality
-document.getElementById("restartBtn").addEventListener("click", () => {
+document.getElementById("restartBtn").addEventListener("click", async () => {
     // Hide completion screen and show quiz area
     document.getElementById("completionArea").classList.add("hidden");
     document.getElementById("quizArea").classList.remove("hidden");
 
     // Restart the quiz with the same items that were used before
     if (lastQuizItems && lastQuizItems.length > 0) {
-        startQuiz(lastQuizItems);
+        const token = document.getElementById("token").value.trim();
+        await startQuiz(lastQuizItems, token);
     } else {
         // Fallback: go back to setup if no items are stored
         console.error("No quiz items stored for restart");
@@ -216,7 +218,7 @@ document.getElementById("quizIncorrectBtn").addEventListener("click", () => {
     startIncorrectQuiz();
 });
 
-function startIncorrectQuiz() {
+async function startIncorrectQuiz() {
     // Get only the kanji that were answered incorrectly
     const incorrectKanjiArray = Array.from(incorrectKanji);
     if (incorrectKanjiArray.length === 0) {
@@ -234,7 +236,8 @@ function startIncorrectQuiz() {
     document.getElementById("quizArea").classList.remove("hidden");
 
     // Start quiz with only incorrect kanji
-    startQuiz(incorrectKanjiData);
+    const token = document.getElementById("token").value.trim();
+    await startQuiz(incorrectKanjiData, token);
 
     showToast(
         `Starting quiz with ${incorrectKanjiData.length} incorrect kanji`,
@@ -352,27 +355,30 @@ document
     });
 
 // Start Selected button handler
-document.getElementById("startSelectedBtn").addEventListener("click", () => {
-    const selectedIds = Array.from(
-        document.querySelectorAll(".kanji-checkbox:checked")
-    ).map((cb) => parseInt(cb.dataset.kanjiId));
+document
+    .getElementById("startSelectedBtn")
+    .addEventListener("click", async () => {
+        const selectedIds = Array.from(
+            document.querySelectorAll(".kanji-checkbox:checked")
+        ).map((cb) => parseInt(cb.dataset.kanjiId));
 
-    // Filter loaded items to only include selected ones
-    const selectedItems = selectionScreenKanjiItems.filter((item) =>
-        selectedIds.includes(item.id)
-    );
+        // Filter loaded items to only include selected ones
+        const selectedItems = selectionScreenKanjiItems.filter((item) =>
+            selectedIds.includes(item.id)
+        );
 
-    if (selectedItems.length === 0) {
-        showToast("Please select at least one kanji", "warning");
-        return;
-    }
+        if (selectedItems.length === 0) {
+            showToast("Please select at least one kanji", "warning");
+            return;
+        }
 
-    // Store selected items for "Try Again" functionality
-    lastQuizItems = selectedItems.slice();
+        // Store selected items for "Try Again" functionality
+        lastQuizItems = selectedItems.slice();
 
-    document.getElementById("selectionArea").classList.add("hidden");
-    startQuiz(selectedItems);
-});
+        document.getElementById("selectionArea").classList.add("hidden");
+        const token = document.getElementById("token").value.trim();
+        await startQuiz(selectedItems, token);
+    });
 
 // Save API key to localStorage
 function saveApiKey() {
@@ -627,7 +633,7 @@ document
 // Quiz These Kanji button handler (from lesson completion)
 document
     .getElementById("startQuizFromLessons")
-    .addEventListener("click", () => {
+    .addEventListener("click", async () => {
         document.getElementById("lessonCompletionArea").classList.add("hidden");
 
         // Check if we're in learn mode
@@ -637,7 +643,8 @@ document
         } else {
             // Store items for "Try Again" functionality
             lastQuizItems = lessonKanjiData.slice();
-            startQuiz(lessonKanjiData);
+            const token = document.getElementById("token").value.trim();
+            await startQuiz(lessonKanjiData, token);
             showToast(
                 `Starting quiz with ${lessonKanjiData.length} kanji from lessons`,
                 "info"

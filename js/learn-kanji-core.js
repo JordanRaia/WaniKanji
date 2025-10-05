@@ -156,7 +156,7 @@ function onLearnLessonsComplete() {
 /**
  * Starts quiz for learn mode (includes current batch + all previously learned)
  */
-function startLearnModeQuiz() {
+async function startLearnModeQuiz() {
     // Combine current batch with all previously learned kanji
     const quizKanji = [...learnedKanji, ...currentLearnBatch];
 
@@ -164,7 +164,7 @@ function startLearnModeQuiz() {
     document.getElementById("lessonCompletionArea").classList.add("hidden");
 
     // Start quiz with learn mode flag
-    startQuizInLearnMode(quizKanji);
+    await startQuizInLearnMode(quizKanji);
 }
 
 /**
@@ -249,10 +249,10 @@ function continueToNextBatch() {
 /**
  * Redoes the quiz with current batch + all previously learned
  */
-function redoLearnQuiz() {
+async function redoLearnQuiz() {
     const quizKanji = [...learnedKanji, ...currentLearnBatch];
     document.getElementById("learnQuizCompletionArea").classList.add("hidden");
-    startQuizInLearnMode(quizKanji);
+    await startQuizInLearnMode(quizKanji);
 }
 
 /**
@@ -275,9 +275,9 @@ function showLearningCompleteScreen() {
 /**
  * Starts a final quiz with all learned kanji
  */
-function startFinalQuizAllLearned() {
+async function startFinalQuizAllLearned() {
     document.getElementById("learningCompleteArea").classList.add("hidden");
-    startQuizInLearnMode(learnKanjiPool);
+    await startQuizInLearnMode(learnKanjiPool);
 }
 
 /**
@@ -319,15 +319,16 @@ function hideAllAreas() {
  * Starts a quiz in learn mode
  * Ensures learnKanjiMode flag stays true throughout quiz lifecycle
  */
-function startQuizInLearnMode(items) {
+async function startQuizInLearnMode(items) {
     // Ensure learn mode flag is set for the entire quiz
     // This flag is checked in showCompletionScreen() to route to learn mode completion
     const wasInLearnMode = learnKanjiMode;
 
     try {
         learnKanjiMode = true;
-        // Start regular quiz (synchronous initialization)
-        startQuiz(items);
+        // Start regular quiz with token
+        const token = (learnKanjiApiToken || "").trim();
+        await startQuiz(items, token);
         // Flag intentionally stays true - don't restore here
         // It will be managed by learn mode completion flow or exitLearnMode()
     } catch (error) {

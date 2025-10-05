@@ -114,6 +114,9 @@ async function fetchSubjectsByIds(token, subjectIds) {
             type: s.object,
             kanji: s.data.characters || "",
             meanings: s.data.meanings.map((m) => m.meaning),
+            readings: s.data.readings
+                ? s.data.readings.map((r) => r.reading)
+                : [],
         };
     });
 }

@@ -30,6 +30,7 @@ let correctKanji = new Set(); // Track which kanji were answered correctly first
 let incorrectKanji = new Set(); // Track which kanji were answered incorrectly
 let allKanjiData = []; // Store all kanji data for reference
 let useSrsFilter = false; // Track if SRS filtering is enabled for this quiz
+let cachedQuizSubjects = new Map(); // Cache for visually similar kanji
 
 // Cross-mode validation tracking
 let userInputHistory = new Map(); // Track user input for each kanji in both modes
@@ -51,7 +52,37 @@ function shuffle(a) {
     return a;
 }
 
-function startQuiz(items) {
+async function prefetchQuizRelatedSubjects(items, token) {
+    // Collect all unique subject IDs for visually similar kanji
+    const allSubjectIds = new Set();
+
+    for (const item of items) {
+        // Add visually similar subject IDs
+        if (item.visually_similar_subject_ids) {
+            item.visually_similar_subject_ids.forEach((id) =>
+                allSubjectIds.add(id)
+            );
+        }
+    }
+
+    // Fetch all subjects at once if there are any
+    if (allSubjectIds.size > 0) {
+        try {
+            const subjects = await fetchSubjectsByIds(
+                token,
+                Array.from(allSubjectIds)
+            );
+            // Store in cache by ID
+            subjects.forEach((subject) => {
+                cachedQuizSubjects.set(subject.id, subject);
+            });
+        } catch (error) {
+            console.error("Error prefetching visually similar kanji:", error);
+        }
+    }
+}
+
+async function startQuiz(items, token) {
     allKanjiData = items.slice(); // Store all kanji data
     // Store for "Try Again" functionality
     if (typeof lastQuizItems !== "undefined") {
@@ -64,6 +95,7 @@ function startQuiz(items) {
     incorrectKanji.clear();
     correctQuestions.clear();
     incorrectQuestions.clear();
+    cachedQuizSubjects.clear();
     document.getElementById("setup").classList.add("hidden");
     document.getElementById("quizArea").classList.remove("hidden");
     document.getElementById("completionArea").classList.add("hidden");
@@ -75,6 +107,11 @@ function startQuiz(items) {
         "modeEnglishToKanjiToggle"
     ).checked;
     useSrsFilter = document.getElementById("srsFilterToggle").checked;
+
+    // Prefetch all visually similar kanji before starting the quiz
+    if (token) {
+        await prefetchQuizRelatedSubjects(items, token);
+    }
 
     // Create queue based on selected modes
     queue = [];
@@ -443,12 +480,56 @@ function checkAnswer() {
         )}`;
         const correctBoxElement = document.getElementById("correctBox");
         if (correctBoxElement) {
-            correctBoxElement.innerHTML =
+            let correctBoxHTML =
                 "<strong>Correct:</strong> " +
                 escapeHtml(correctText) +
                 `<br><a href="${escapeHtml(
                     wanikaniUrl
                 )}" target="_blank" class="link link-primary text-sm mt-2 inline-block">View on WaniKani →</a>`;
+
+            // Add visually similar kanji if available
+            if (
+                card.visually_similar_subject_ids &&
+                card.visually_similar_subject_ids.length > 0
+            ) {
+                const similarKanji = card.visually_similar_subject_ids
+                    .map((id) => cachedQuizSubjects.get(id))
+                    .filter((subject) => subject !== undefined);
+
+                if (similarKanji.length > 0) {
+                    // Determine if we should show readings or meanings
+                    const showReadings =
+                        card.questionType === "kanji-to-reading" ||
+                        card.questionType === "english-to-reading-or-kanji";
+
+                    correctBoxHTML += `<div class="mt-3 pt-3 border-t border-base-300">
+                        <strong class="text-info">Visually Similar:</strong>
+                        <div class="flex flex-wrap gap-2 mt-2">`;
+
+                    similarKanji.forEach((k) => {
+                        // Show readings if in reading mode, otherwise show meanings
+                        const displayText = showReadings
+                            ? k.readings.join(", ")
+                            : k.meanings.join(", ");
+
+                        correctBoxHTML += `
+                            <div class="flex flex-col items-center p-2 bg-base-300 rounded-lg text-xs" title="${escapeHtml(
+                                displayText
+                            )}">
+                                <span class="text-xl mb-1">${escapeHtml(
+                                    k.kanji
+                                )}</span>
+                                <span class="text-xs text-base-content/70">${escapeHtml(
+                                    displayText
+                                )}</span>
+                            </div>`;
+                    });
+
+                    correctBoxHTML += `</div></div>`;
+                }
+            }
+
+            correctBoxElement.innerHTML = correctBoxHTML;
         }
         document.getElementById("correctBox").classList.remove("hidden");
         // move wrong card to end (so it will reappear later)
