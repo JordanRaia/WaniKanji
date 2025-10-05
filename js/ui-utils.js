@@ -38,7 +38,7 @@ function applyColorConfig() {
     // Apply kanji color
     const kanjiDisplay = document.getElementById("kanjiDisplay");
     if (kanjiDisplay) {
-        kanjiDisplay.className = `kanji mb-4 ${COLOR_CONFIG.kanji}`;
+        kanjiDisplay.className = `text-6xl sm:text-7xl lg:text-9xl text-center my-2.5 break-words ${COLOR_CONFIG.kanji}`;
     }
 }
 
