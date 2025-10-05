@@ -119,10 +119,15 @@ function startQuiz(items) {
 
     // Update mode label based on current settings
     const selectedModes = [];
-    if (modeKanjiToEnglish) selectedModes.push("Kanji → English Meaning");
-    if (readingMode) selectedModes.push("Kanji → Japanese Reading");
-    if (modeEnglishToKanji)
+    if (modeKanjiToEnglish) {
+        selectedModes.push("Kanji → English Meaning");
+    }
+    if (readingMode) {
+        selectedModes.push("Kanji → Japanese Reading");
+    }
+    if (modeEnglishToKanji) {
         selectedModes.push("English Meaning → Japanese Reading");
+    }
 
     if (selectedModes.length === 0) {
         document.getElementById("modeLabel").textContent =
@@ -237,11 +242,17 @@ function showCard() {
 }
 
 function checkAnswer() {
-    if (awaitingContinue) return; // don't allow checking while waiting
+    if (awaitingContinue) {
+        return;
+    } // don't allow checking while waiting
     const card = queue[currentIndex];
-    if (!card) return;
+    if (!card) {
+        return;
+    }
     const raw = document.getElementById("answer").value;
-    if (!raw.trim()) return;
+    if (!raw.trim()) {
+        return;
+    }
 
     let ok = false;
 
@@ -262,7 +273,9 @@ function checkAnswer() {
             }
         }
     } else if (card.questionType === "english-to-kanji") {
-        if (raw.trim() === card.kanji) ok = true;
+        if (raw.trim() === card.kanji) {
+            ok = true;
+        }
     } else if (card.questionType === "english-to-reading-or-kanji") {
         // English Meaning → Japanese Reading mode - accept either reading or kanji
         // Check if it matches the kanji character
@@ -367,11 +380,8 @@ function checkAnswer() {
             if (!incorrectQuestions.has(questionId)) {
                 correctQuestions.add(questionId);
             }
-        } else {
-            // For single mode, use the original logic
-            if (!incorrectKanji.has(card.kanji)) {
-                correctCount++;
-            }
+        } else if (!incorrectKanji.has(card.kanji)) {
+            correctCount++;
         }
 
         const resultElement = document.getElementById("result");
@@ -382,7 +392,9 @@ function checkAnswer() {
         }
         // remove card from queue
         queue.splice(currentIndex, 1);
-        if (currentIndex >= queue.length) currentIndex = 0;
+        if (currentIndex >= queue.length) {
+            currentIndex = 0;
+        }
         if (queue.length === 0) {
             showCompletionScreen();
             return;
@@ -442,7 +454,9 @@ function checkAnswer() {
         // move wrong card to end (so it will reappear later)
         const c = queue.splice(currentIndex, 1)[0];
         queue.push(c);
-        if (currentIndex >= queue.length) currentIndex = 0;
+        if (currentIndex >= queue.length) {
+            currentIndex = 0;
+        }
         // disable input until continue
         document.getElementById("answer").disabled = true;
         document.getElementById("checkBtn").disabled = true;
