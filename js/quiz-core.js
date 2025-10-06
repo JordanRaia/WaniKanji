@@ -13,7 +13,7 @@ const COLOR_CONFIG = {
         modeLabel: "bg-primary text-primary-content",
     },
     // Kanji character color
-    kanji: "text-white",
+    kanji: "",
 };
 
 // Global quiz state

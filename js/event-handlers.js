@@ -126,7 +126,7 @@ document.getElementById("startAllBtn").addEventListener("click", async () => {
         // Re-enable buttons if loading failed
         startBtn.disabled = false;
         selectBtn.disabled = false;
-        startBtn.textContent = "Quick Quiz";
+        startBtn.textContent = "Quiz All";
     }
 });
 
@@ -366,8 +366,8 @@ function resetSetupButtons() {
     selectBtn.disabled = false;
     lessonBtn.disabled = false;
     learnBtn.disabled = false;
-    startBtn.textContent = "Quick Quiz";
-    selectBtn.textContent = "Custom Quiz";
+    startBtn.textContent = "Quiz All";
+    selectBtn.textContent = "Select Quiz";
     lessonBtn.textContent = "Lessons";
     learnBtn.textContent = "Learn";
 }

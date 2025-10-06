@@ -200,7 +200,7 @@ function showLearnQuizCompletionScreen() {
     if (remaining > 0) {
         message += ` ${remaining} kanji remaining.`;
     } else {
-        message = `You've completed all ${totalKanji} kanji! 🎉`;
+        message = `You've completed all ${totalKanji} kanji!`;
     }
     document.getElementById("learnProgressMessage").textContent = message;
 
