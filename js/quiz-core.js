@@ -505,6 +505,44 @@ function checkAnswer() {
                     wanikaniUrl
                 )}" target="_blank" class="link link-primary text-sm mt-2 inline-block">View on WaniKani →</a>`;
 
+            // Add mnemonic based on question type
+            let mnemonicToShow = "";
+            if (
+                card.questionType === "kanji-to-reading" ||
+                card.questionType === "english-to-reading-or-kanji"
+            ) {
+                // For reading questions, show reading mnemonic
+                mnemonicToShow = card.reading_mnemonic;
+            } else if (card.questionType === "kanji-to-english") {
+                // For meaning questions, show meaning mnemonic
+                mnemonicToShow = card.meaning_mnemonic;
+            }
+
+            if (mnemonicToShow) {
+                // Sanitize the HTML to allow safe tags like <radical>, <kanji>, <vocabulary>
+                const sanitizedMnemonic = DOMPurify.sanitize(mnemonicToShow, {
+                    ALLOWED_TAGS: [
+                        "radical",
+                        "kanji",
+                        "vocabulary",
+                        "reading",
+                        "ja",
+                        "br",
+                        "p",
+                        "strong",
+                        "em",
+                        "b",
+                        "i",
+                    ],
+                    ALLOWED_ATTR: [],
+                });
+
+                correctBoxHTML += `<div class="mt-3 pt-3 border-t border-base-300">
+                    <strong>Mnemonic:</strong>
+                    <div class="mt-2 text-sm text-base-content/80 leading-relaxed">${sanitizedMnemonic}</div>
+                </div>`;
+            }
+
             // Add visually similar kanji if available
             if (
                 card.visually_similar_subject_ids &&
