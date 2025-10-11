@@ -329,14 +329,22 @@ function updatePreviewGrid(items = []) {
             item.meanings.join(", ")
         )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
 
-        kanjiEl.className = `tooltip h-10 rounded flex items-center justify-center text-lg font-medium hover:brightness-95 transition-all cursor-pointer ${colorClasses}`;
+        kanjiEl.className = `tooltip h-10 rounded flex flex-col items-center justify-center text-lg font-medium hover:brightness-95 transition-all cursor-pointer ${colorClasses}`;
         kanjiEl.setAttribute("data-tip", tooltipText);
         kanjiEl.href = `https://www.wanikani.com/kanji/${encodeURIComponent(
             item.kanji
         )}`;
         kanjiEl.target = "_blank";
         kanjiEl.rel = "noopener noreferrer";
-        kanjiEl.textContent = item.kanji;
+
+        // Create kanji content with progress bar
+        const kanjiContent = document.createElement("div");
+        kanjiContent.className = "flex flex-col items-center";
+        kanjiContent.innerHTML = `
+            <span class="text-lg">${escapeHtml(item.kanji)}</span>
+            ${generateProgressBar(srsStage)}
+        `;
+        kanjiEl.appendChild(kanjiContent);
 
         previewGrid.appendChild(kanjiEl);
     });
@@ -345,10 +353,10 @@ function updatePreviewGrid(items = []) {
 // Helper function to get SRS stage name
 function getSrsStageName(srsStage) {
     if (srsStage >= 1 && srsStage <= 4) {
-        return "Apprentice";
+        return `Apprentice ${srsStage}`;
     }
     if (srsStage >= 5 && srsStage <= 6) {
-        return "Guru";
+        return `Guru ${srsStage - 4}`;
     }
     if (srsStage === 7) {
         return "Master";
@@ -360,6 +368,42 @@ function getSrsStageName(srsStage) {
         return "Burned";
     }
     return "Locked";
+}
+
+// Helper function to generate progress bar HTML based on SRS stage
+function generateProgressBar(srsStage) {
+    if (srsStage === null || srsStage === undefined) {
+        // Locked - no progress bar
+        return "";
+    }
+
+    let segments = 1;
+    let filledSegments = 0;
+    let stageClass = "";
+
+    if (srsStage >= 1 && srsStage <= 4) {
+        // Apprentice: 4 segments, filled based on stage
+        segments = 4;
+        filledSegments = srsStage;
+        stageClass = "apprentice";
+    } else if (srsStage >= 5 && srsStage <= 6) {
+        // Guru: 2 segments, filled based on stage
+        segments = 2;
+        filledSegments = srsStage - 4;
+        stageClass = "guru";
+    } else {
+        // Master, Enlightened, Burned - no progress bar needed (only 1 level each)
+        return "";
+    }
+
+    let segmentsHtml = "";
+    for (let i = 0; i < segments; i++) {
+        const isFilled = i < filledSegments;
+        const filledClass = isFilled ? "filled" : "";
+        segmentsHtml += `<div class="progress-segment ${stageClass} ${filledClass}"></div>`;
+    }
+
+    return `<div class="progress-segments">${segmentsHtml}</div>`;
 }
 
 function clearPreviewGrid() {

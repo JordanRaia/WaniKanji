@@ -356,9 +356,10 @@ function showLessonSelectionScreen(items) {
                    data-kanji-id="${escapeHtml(String(item.id))}" 
                    data-srs-stage="${escapeHtml(stageName)}"
                    checked />
-            <span class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses}" data-tip="${tooltipText}">${escapeHtml(
-            item.kanji
-        )}</span>
+            <div class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses} flex flex-col items-center" data-tip="${tooltipText}">
+                <span>${escapeHtml(item.kanji)}</span>
+                ${generateProgressBar(srsStage)}
+            </div>
         `;
 
         kanjiGrid.appendChild(kanjiItem);

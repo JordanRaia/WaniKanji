@@ -121,6 +121,51 @@
                 border-color: oklch(var(--b3));
                 color: oklch(var(--bc));
             }
+
+            /* Progress bar segments for SRS stages */
+            .progress-segments {
+                display: flex;
+                gap: 2px;
+                margin-top: 2px;
+                justify-content: center;
+            }
+
+            .progress-segment {
+                width: 6px;
+                height: 3px;
+                border-radius: 1px;
+                background-color: currentColor;
+                opacity: 0.2;
+            }
+
+            .progress-segment.filled {
+                opacity: 1;
+            }
+
+            /* Apprentice segments - use secondary color */
+            .progress-segment.apprentice {
+                background-color: oklch(var(--s));
+            }
+
+            /* Guru segments - use primary color */
+            .progress-segment.guru {
+                background-color: oklch(var(--p));
+            }
+
+            /* Master segments - use info color */
+            .progress-segment.master {
+                background-color: oklch(var(--in));
+            }
+
+            /* Enlightened segments - use success color */
+            .progress-segment.enlightened {
+                background-color: oklch(var(--su));
+            }
+
+            /* Burned segments - use warning color */
+            .progress-segment.burned {
+                background-color: oklch(var(--wa));
+            }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
