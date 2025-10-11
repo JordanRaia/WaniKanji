@@ -229,16 +229,14 @@
                             <h2 class="card-title text-2xl">Setup</h2>
                             <div class="flex items-center gap-4">
                                 <button
-                                    id="themeToggle"
-                                    class="btn btn-ghost btn-sm btn-circle"
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
                                     title="Toggle theme"
                                     aria-label="Toggle theme"
                                 >
                                     <!-- Sun icon (light mode) -->
                                     <svg
-                                        id="sunIcon"
+                                        class="theme-icon-sun h-5 w-5"
                                         xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -252,9 +250,8 @@
                                     </svg>
                                     <!-- Moon icon (dark mode) -->
                                     <svg
-                                        id="moonIcon"
+                                        class="theme-icon-moon h-5 w-5 hidden"
                                         xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5 hidden"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -571,9 +568,45 @@
                 <div id="selectionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title text-2xl mb-4">
-                                Select Kanji to Quiz
-                            </h2>
+                            <div class="flex items-start justify-between mb-4">
+                                <h2 class="card-title text-2xl">
+                                    Select Kanji to Quiz
+                                </h2>
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
 
                             <div class="flex justify-between items-center mb-4">
                                 <div class="text-sm text-base-content/70">
@@ -635,7 +668,43 @@
                 <div id="lessonSelectionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title text-2xl mb-4">Lessons</h2>
+                            <div class="flex items-start justify-between mb-4">
+                                <h2 class="card-title text-2xl">Lessons</h2>
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
 
                             <div class="flex justify-between items-center mb-4">
                                 <div class="text-sm text-base-content/70">
@@ -735,12 +804,48 @@
                                         Use ← → or Enter to navigate
                                     </div>
                                 </div>
-                                <button
-                                    id="backToSetupFromLesson"
-                                    class="btn btn-outline btn-sm"
-                                >
-                                    ← Back to Setup
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                        title="Toggle theme"
+                                        aria-label="Toggle theme"
+                                    >
+                                        <svg
+                                            class="theme-icon-sun h-5 w-5"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="theme-icon-moon h-5 w-5 hidden"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        id="backToSetupFromLesson"
+                                        class="btn btn-outline btn-sm"
+                                    >
+                                        ← Back to Setup
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Loading Skeleton -->
@@ -912,6 +1017,42 @@
                 <div id="lessonCompletionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body text-center">
+                            <div class="flex justify-end mb-2">
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                             <h2 class="card-title text-3xl mb-4 justify-center">
                                 Lessons Complete!
                             </h2>
@@ -973,6 +1114,40 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
+                                    <button
+                                        class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                        title="Toggle theme"
+                                        aria-label="Toggle theme"
+                                    >
+                                        <svg
+                                            class="theme-icon-sun h-5 w-5"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                            />
+                                        </svg>
+                                        <svg
+                                            class="theme-icon-moon h-5 w-5 hidden"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                            />
+                                        </svg>
+                                    </button>
                                     <button
                                         id="backBtn"
                                         class="btn btn-outline btn-sm"
@@ -1062,6 +1237,42 @@
                 <div id="completionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body text-center">
+                            <div class="flex justify-end mb-2">
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                             <h2 class="card-title text-3xl mb-4 justify-center">
                                 Quiz Complete!
                             </h2>
@@ -1176,9 +1387,45 @@
                 <div id="learnKanjiSelectionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body">
-                            <h2 class="card-title text-2xl mb-4">
-                                Select Kanji to Learn
-                            </h2>
+                            <div class="flex items-start justify-between mb-4">
+                                <h2 class="card-title text-2xl">
+                                    Select Kanji to Learn
+                                </h2>
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
 
                             <div class="flex justify-between items-center mb-4">
                                 <div class="text-sm text-base-content/70">
@@ -1265,6 +1512,42 @@
                 <div id="learnModeProgressArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body text-center">
+                            <div class="flex justify-end mb-2">
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="badge badge-accent badge-lg mb-2">
                                 Learning Mode
                             </div>
@@ -1338,6 +1621,42 @@
                 <div id="learnQuizCompletionArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body text-center">
+                            <div class="flex justify-end mb-2">
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="badge badge-accent badge-lg mb-2">
                                 Learning Mode
                             </div>
@@ -1461,6 +1780,42 @@
                 <div id="learningCompleteArea" class="hidden mt-6">
                     <div class="card bg-base-100 shadow-xl">
                         <div class="card-body text-center">
+                            <div class="flex justify-end mb-2">
+                                <button
+                                    class="theme-toggle-btn btn btn-ghost btn-sm btn-circle"
+                                    title="Toggle theme"
+                                    aria-label="Toggle theme"
+                                >
+                                    <svg
+                                        class="theme-icon-sun h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <svg
+                                        class="theme-icon-moon h-5 w-5 hidden"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="badge badge-accent badge-lg mb-2">
                                 Learning Mode
                             </div>
@@ -1556,27 +1911,36 @@
                     );
                 }
 
-                function updateThemeIcon(actualTheme) {
-                    const sunIcon = document.getElementById("sunIcon");
-                    const moonIcon = document.getElementById("moonIcon");
-
-                    if (!sunIcon || !moonIcon) return;
+                function updateAllThemeIcons(actualTheme) {
+                    // Update all sun and moon icons across all theme toggle buttons
+                    const sunIcons =
+                        document.querySelectorAll(".theme-icon-sun");
+                    const moonIcons =
+                        document.querySelectorAll(".theme-icon-moon");
 
                     // Show sun or moon based on actual applied theme
                     if (actualTheme === "light") {
-                        sunIcon.classList.remove("hidden");
-                        moonIcon.classList.add("hidden");
+                        sunIcons.forEach((icon) =>
+                            icon.classList.remove("hidden")
+                        );
+                        moonIcons.forEach((icon) =>
+                            icon.classList.add("hidden")
+                        );
                     } else {
-                        sunIcon.classList.add("hidden");
-                        moonIcon.classList.remove("hidden");
+                        sunIcons.forEach((icon) =>
+                            icon.classList.add("hidden")
+                        );
+                        moonIcons.forEach((icon) =>
+                            icon.classList.remove("hidden")
+                        );
                     }
                 }
 
-                // Apply the theme and update icon
+                // Apply the theme and update icons
                 const actualTheme =
                     savedTheme === "system" ? getSystemTheme() : savedTheme;
                 applyTheme(savedTheme);
-                updateThemeIcon(actualTheme);
+                updateAllThemeIcons(actualTheme);
 
                 // Listen for system theme changes (only if still on system preference)
                 window
@@ -1587,16 +1951,17 @@
                         if (currentTheme === "system") {
                             const newSystemTheme = getSystemTheme();
                             applyTheme("system");
-                            updateThemeIcon(newSystemTheme);
+                            updateAllThemeIcons(newSystemTheme);
                         }
                     });
             })();
 
             // Theme switcher event handlers
             document.addEventListener("DOMContentLoaded", function () {
-                const themeToggle = document.getElementById("themeToggle");
+                const themeToggleButtons =
+                    document.querySelectorAll(".theme-toggle-btn");
 
-                if (!themeToggle) return;
+                if (themeToggleButtons.length === 0) return;
 
                 function getSystemTheme() {
                     return window.matchMedia("(prefers-color-scheme: dark)")
@@ -1614,42 +1979,56 @@
                     );
                 }
 
-                function updateThemeIcon(actualTheme) {
-                    const sunIcon = document.getElementById("sunIcon");
-                    const moonIcon = document.getElementById("moonIcon");
+                function updateAllThemeIcons(actualTheme) {
+                    // Update all sun and moon icons across all theme toggle buttons
+                    const sunIcons =
+                        document.querySelectorAll(".theme-icon-sun");
+                    const moonIcons =
+                        document.querySelectorAll(".theme-icon-moon");
 
                     // Show sun or moon based on actual applied theme
                     if (actualTheme === "light") {
-                        sunIcon.classList.remove("hidden");
-                        moonIcon.classList.add("hidden");
+                        sunIcons.forEach((icon) =>
+                            icon.classList.remove("hidden")
+                        );
+                        moonIcons.forEach((icon) =>
+                            icon.classList.add("hidden")
+                        );
                     } else {
-                        sunIcon.classList.add("hidden");
-                        moonIcon.classList.remove("hidden");
+                        sunIcons.forEach((icon) =>
+                            icon.classList.add("hidden")
+                        );
+                        moonIcons.forEach((icon) =>
+                            icon.classList.remove("hidden")
+                        );
                     }
                 }
 
-                themeToggle.addEventListener("click", function () {
-                    const currentTheme =
-                        localStorage.getItem("wanikanji-theme") || "system";
+                // Add click event to all theme toggle buttons
+                themeToggleButtons.forEach((button) => {
+                    button.addEventListener("click", function () {
+                        const currentTheme =
+                            localStorage.getItem("wanikanji-theme") || "system";
 
-                    // Get the current actual theme being displayed
-                    const currentActualTheme =
-                        currentTheme === "system"
-                            ? getSystemTheme()
-                            : currentTheme;
+                        // Get the current actual theme being displayed
+                        const currentActualTheme =
+                            currentTheme === "system"
+                                ? getSystemTheme()
+                                : currentTheme;
 
-                    // Toggle to the opposite of what's currently shown
-                    const nextTheme =
-                        currentActualTheme === "light" ? "dark" : "light";
+                        // Toggle to the opposite of what's currently shown
+                        const nextTheme =
+                            currentActualTheme === "light" ? "dark" : "light";
 
-                    // Apply theme
-                    applyTheme(nextTheme);
+                        // Apply theme
+                        applyTheme(nextTheme);
 
-                    // Update icon
-                    updateThemeIcon(nextTheme);
+                        // Update all icons
+                        updateAllThemeIcons(nextTheme);
 
-                    // Save to localStorage (no longer "system")
-                    localStorage.setItem("wanikanji-theme", nextTheme);
+                        // Save to localStorage (no longer "system")
+                        localStorage.setItem("wanikanji-theme", nextTheme);
+                    });
                 });
             });
         </script>
