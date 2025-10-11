@@ -128,6 +128,7 @@
                 gap: 2px;
                 margin-top: 2px;
                 justify-content: center;
+                min-height: 3px;
             }
 
             .progress-segment {
@@ -668,6 +669,30 @@
                                 </div>
                             </div>
 
+                            <!-- Randomization Option -->
+                            <div class="mb-4">
+                                <label
+                                    class="flex items-center gap-3 cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="lessonRandomizeOrderToggle"
+                                        class="checkbox checkbox-sm checkbox-primary"
+                                    />
+                                    <div>
+                                        <div class="font-medium">
+                                            Randomize order
+                                        </div>
+                                        <div
+                                            class="text-xs text-base-content/60"
+                                        >
+                                            Shuffle kanji order instead of
+                                            sorting by SRS stage
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
                             <div
                                 id="lessonKanjiGrid"
                                 class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-3 mb-6 p-4 bg-base-200 rounded-lg"
@@ -963,6 +988,20 @@
                                 </div>
                             </div>
 
+                            <!-- Quiz Loading Skeleton -->
+                            <div
+                                id="quizLoadingSkeleton"
+                                class="text-center mb-8 hidden"
+                            >
+                                <div
+                                    class="skeleton h-32 w-32 mx-auto mb-4"
+                                ></div>
+                                <div
+                                    class="skeleton h-6 w-32 mx-auto mb-2"
+                                ></div>
+                                <div class="skeleton h-6 w-48 mx-auto"></div>
+                            </div>
+
                             <div id="question" class="text-center mb-8">
                                 <div
                                     class="text-6xl sm:text-7xl lg:text-9xl text-center my-2.5 break-words"
@@ -1172,6 +1211,30 @@
                                 <div class="flex flex-wrap gap-3">
                                     <!-- Stage checkboxes will be populated dynamically -->
                                 </div>
+                            </div>
+
+                            <!-- Randomization Option -->
+                            <div class="mb-4">
+                                <label
+                                    class="flex items-center gap-3 cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id="learnRandomizeOrderToggle"
+                                        class="checkbox checkbox-sm checkbox-primary"
+                                    />
+                                    <div>
+                                        <div class="font-medium">
+                                            Randomize order
+                                        </div>
+                                        <div
+                                            class="text-xs text-base-content/60"
+                                        >
+                                            Shuffle kanji order instead of
+                                            sorting by SRS stage
+                                        </div>
+                                    </div>
+                                </label>
                             </div>
 
                             <div
@@ -1599,10 +1662,12 @@
         <script src="js/api.js"></script>
         <script src="js/cross-mode-validation.js"></script>
         <script src="js/quiz-core.js"></script>
-        <script src="js/lesson-core.js"></script>
-        <script src="js/learn-kanji-core.js"></script>
+        <script src="js/srs-utils.js"></script>
         <script src="js/ui-utils.js"></script>
         <script src="js/setup-ui.js"></script>
+        <script src="js/kanji-item-utils.js"></script>
+        <script src="js/lesson-core.js"></script>
+        <script src="js/learn-kanji-core.js"></script>
         <script src="js/event-handlers.js"></script>
     </body>
 </html>

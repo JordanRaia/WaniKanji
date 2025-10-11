@@ -1,4 +1,4 @@
-// WaniKanji - Lesson Core Logic
+// WaniKanji - Lesson Core
 
 // Global lesson state
 let lessonQueue = [];
@@ -295,9 +295,6 @@ function completeLessons() {
 }
 
 function showLessonSelectionScreen(items) {
-    // Store items for later use
-    window.lessonSelectionScreenKanjiItems = items;
-
     document.getElementById("setup").classList.add("hidden");
     document.getElementById("lessonSelectionArea").classList.remove("hidden");
 
@@ -310,58 +307,30 @@ function showLessonSelectionScreen(items) {
     // Set total count
     totalKanjiCount.textContent = items.length;
 
-    // Populate stage filter checkboxes
-    populateStageFilters(
-        items,
-        "lessonStageFilters",
-        ".lesson-kanji-checkbox",
-        updateLessonSelectedCount
-    );
+    // Reset randomize checkbox to unchecked
+    document.getElementById("lessonRandomizeOrderToggle").checked = false;
 
-    // Sort items by rank (SRS stage) - null/undefined (locked) first, then lower numbers first
-    const sortedItems = sortKanjiByRank(items);
+    // Store the original items before any sorting/randomization (for toggle re-sorting)
+    window.lessonSelectionScreenKanjiItems = items;
+
+    // Sort items by rank (SRS stage) or randomize based on checkbox
+    const randomizeOrder = document.getElementById(
+        "lessonRandomizeOrderToggle"
+    ).checked;
+    const sortedItems = randomizeOrder
+        ? randomizeKanjiOrder(items)
+        : sortKanjiByRank(items);
+
+    // Store the displayed items (for starting lessons in this order)
+    window.lessonDisplayedKanjiItems = sortedItems;
 
     // Create checkboxes for each kanji
     sortedItems.forEach((item) => {
-        const kanjiItem = document.createElement("label");
-        kanjiItem.className =
-            "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";
-
-        // Get assignment data to determine SRS stage
-        const assignment = cachedKanjiData.assignments.get(item.id);
-        const srsStage = assignment ? assignment.srsStage : null;
-
-        // Build tooltip text
-        let stageInfo = "";
-        if (srsStage !== null && srsStage !== undefined) {
-            const stageName = getSrsStageName(srsStage);
-            stageInfo = ` [${stageName}]`;
-        }
-        const tooltipText = `${escapeHtml(
-            item.meanings.join(", ")
-        )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
-
-        // Get color classes for kanji based on SRS stage
-        const colorClasses = getSrsStageColorClass(srsStage);
-
-        // Determine stage name for filtering
-        const stageName =
-            srsStage === null || srsStage === undefined
-                ? "locked"
-                : getSrsStageName(srsStage).toLowerCase();
-
-        kanjiItem.innerHTML = `
-            <input type="checkbox" 
-                   class="checkbox checkbox-sm lesson-kanji-checkbox" 
-                   data-kanji-id="${escapeHtml(String(item.id))}" 
-                   data-srs-stage="${escapeHtml(stageName)}"
-                   checked />
-            <div class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses} flex flex-col items-center" data-tip="${tooltipText}">
-                <span>${escapeHtml(item.kanji)}</span>
-                ${generateProgressBar(srsStage)}
-            </div>
-        `;
-
+        const kanjiItem = createKanjiSelectionItem(
+            item,
+            "lesson-kanji-checkbox",
+            window.cachedKanjiData
+        );
         kanjiGrid.appendChild(kanjiItem);
     });
 
@@ -372,6 +341,56 @@ function showLessonSelectionScreen(items) {
     document.querySelectorAll(".lesson-kanji-checkbox").forEach((checkbox) => {
         checkbox.addEventListener("change", updateLessonSelectedCount);
     });
+
+    // Populate stage filter checkboxes AFTER kanji checkboxes are created
+    populateStageFilters(
+        items,
+        "lessonStageFilters",
+        ".lesson-kanji-checkbox",
+        updateLessonSelectedCount
+    );
+
+    // Add event listener to randomization checkbox
+    document
+        .getElementById("lessonRandomizeOrderToggle")
+        .addEventListener("change", () => {
+            // Re-sort and re-render the kanji grid
+            const randomizeOrder = document.getElementById(
+                "lessonRandomizeOrderToggle"
+            ).checked;
+            const sortedItems = randomizeOrder
+                ? randomizeKanjiOrder(window.lessonSelectionScreenKanjiItems)
+                : sortKanjiByRank(window.lessonSelectionScreenKanjiItems);
+
+            // Clear and re-populate the grid
+            const kanjiGrid = document.getElementById("lessonKanjiGrid");
+            kanjiGrid.innerHTML = "";
+
+            sortedItems.forEach((item) => {
+                const kanjiItem = createKanjiSelectionItem(
+                    item,
+                    "lesson-kanji-checkbox",
+                    window.cachedKanjiData
+                );
+                kanjiGrid.appendChild(kanjiItem);
+            });
+
+            // Re-add event listeners to new checkboxes
+            document
+                .querySelectorAll(".lesson-kanji-checkbox")
+                .forEach((checkbox) => {
+                    checkbox.addEventListener(
+                        "change",
+                        updateLessonSelectedCount
+                    );
+                });
+
+            // Update selected count
+            updateLessonSelectedCount();
+
+            // Store the newly displayed items
+            window.lessonDisplayedKanjiItems = sortedItems;
+        });
 }
 
 function updateLessonSelectedCount() {

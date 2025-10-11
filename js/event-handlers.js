@@ -150,7 +150,7 @@ document
             // Re-enable buttons if loading failed
             startBtn.disabled = false;
             selectBtn.disabled = false;
-            selectBtn.textContent = "Select Kanji";
+            selectBtn.textContent = "Select Quiz";
         }
     });
 
@@ -318,10 +318,7 @@ function populateStageFilters(
     items.forEach((item) => {
         const assignment = cachedKanjiData.assignments.get(item.id);
         const srsStage = assignment ? assignment.srsStage : null;
-        const stageName =
-            srsStage === null || srsStage === undefined
-                ? "locked"
-                : getSrsStageName(srsStage).toLowerCase();
+        const stageName = getSimpleStageName(srsStage);
         stagesPresent.add(stageName);
     });
 
@@ -400,58 +397,16 @@ function showKanjiSelectionScreen(items) {
     // Set total count
     totalKanjiCount.textContent = items.length;
 
-    // Populate stage filter checkboxes
-    populateStageFilters(
-        items,
-        "quizStageFilters",
-        ".kanji-checkbox",
-        updateSelectedCount
-    );
-
-    // Sort items by rank (SRS stage) - null/undefined (locked) first, then lower numbers first
+    // Quiz selection screen shows kanji in SRS order (least known to most known)
     const sortedItems = sortKanjiByRank(items);
 
     // Create checkboxes for each kanji
     sortedItems.forEach((item, index) => {
-        const kanjiItem = document.createElement("label");
-        kanjiItem.className =
-            "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";
-
-        // Get assignment data to determine SRS stage
-        const assignment = cachedKanjiData.assignments.get(item.id);
-        const srsStage = assignment ? assignment.srsStage : null;
-
-        // Build tooltip text
-        let stageInfo = "";
-        if (srsStage !== null && srsStage !== undefined) {
-            const stageName = getSrsStageName(srsStage);
-            stageInfo = ` [${stageName}]`;
-        }
-        const tooltipText = `${escapeHtml(
-            item.meanings.join(", ")
-        )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
-
-        // Get color classes for kanji based on SRS stage
-        const colorClasses = getSrsStageColorClass(srsStage);
-
-        // Determine stage name for filtering
-        const stageName =
-            srsStage === null || srsStage === undefined
-                ? "locked"
-                : getSrsStageName(srsStage).toLowerCase();
-
-        kanjiItem.innerHTML = `
-            <input type="checkbox" 
-                   class="checkbox checkbox-sm kanji-checkbox" 
-                   data-kanji-id="${escapeHtml(String(item.id))}" 
-                   data-srs-stage="${escapeHtml(stageName)}"
-                   checked />
-            <div class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses} flex flex-col items-center" data-tip="${tooltipText}">
-                <span>${escapeHtml(item.kanji)}</span>
-                ${generateProgressBar(srsStage)}
-            </div>
-        `;
-
+        const kanjiItem = createKanjiSelectionItem(
+            item,
+            "kanji-checkbox",
+            window.cachedKanjiData
+        );
         kanjiGrid.appendChild(kanjiItem);
     });
 
@@ -462,6 +417,14 @@ function showKanjiSelectionScreen(items) {
     document.querySelectorAll(".kanji-checkbox").forEach((checkbox) => {
         checkbox.addEventListener("change", updateSelectedCount);
     });
+
+    // Populate stage filter checkboxes AFTER kanji checkboxes are created
+    populateStageFilters(
+        items,
+        "quizStageFilters",
+        ".kanji-checkbox",
+        updateSelectedCount
+    );
 }
 
 function updateSelectedCount() {
@@ -879,7 +842,10 @@ document
             document.querySelectorAll(".lesson-kanji-checkbox:checked")
         ).map((cb) => parseInt(cb.dataset.kanjiId));
 
-        const items = window.lessonSelectionScreenKanjiItems;
+        // Use the displayed items to preserve the order shown on screen
+        const items =
+            window.lessonDisplayedKanjiItems ||
+            window.lessonSelectionScreenKanjiItems;
         const selectedItems = items.filter((item) =>
             selectedIds.includes(item.id)
         );
@@ -1042,8 +1008,10 @@ document
             document.querySelectorAll(".learn-kanji-checkbox:checked")
         ).map((cb) => parseInt(cb.dataset.kanjiId));
 
-        // Filter loaded items to only include selected ones
-        const selectedItems = learnSelectionScreenKanjiItems.filter((item) =>
+        // Use the displayed items to preserve the order shown on screen
+        const items =
+            window.learnDisplayedKanjiItems || learnSelectionScreenKanjiItems;
+        const selectedItems = items.filter((item) =>
             selectedIds.includes(item.id)
         );
 

@@ -101,6 +101,10 @@ async function startQuiz(items, token) {
     document.getElementById("completionArea").classList.add("hidden");
     document.getElementById("answer").value = "";
 
+    // Show loading skeleton initially
+    document.getElementById("quizLoadingSkeleton").classList.remove("hidden");
+    document.getElementById("question").classList.add("hidden");
+
     modeKanjiToEnglish = document.getElementById("modeToggle").checked;
     readingMode = document.getElementById("readingToggle").checked;
     modeEnglishToKanji = document.getElementById(
@@ -195,6 +199,10 @@ function showCard() {
     document.getElementById("correctBox").classList.add("hidden");
     document.getElementById("answer").disabled = false;
     document.getElementById("checkBtn").disabled = false;
+
+    // Hide loading skeleton and show question
+    document.getElementById("quizLoadingSkeleton").classList.add("hidden");
+    document.getElementById("question").classList.remove("hidden");
 
     updateProgress();
     const card = queue[currentIndex];

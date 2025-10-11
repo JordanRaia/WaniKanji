@@ -371,10 +371,14 @@ function getSrsStageName(srsStage) {
 }
 
 // Helper function to generate progress bar HTML based on SRS stage
-function generateProgressBar(srsStage) {
+// @param {number|null} srsStage - The SRS stage number
+// @param {boolean} alwaysShowContainer - If true, always returns a container div for uniform sizing
+function generateProgressBar(srsStage, alwaysShowContainer = false) {
     if (srsStage === null || srsStage === undefined) {
-        // Locked - no progress bar
-        return "";
+        // Locked - return empty container only if alwaysShowContainer is true
+        return alwaysShowContainer
+            ? '<div class="progress-segments"></div>'
+            : "";
     }
 
     let segments = 1;
@@ -392,8 +396,10 @@ function generateProgressBar(srsStage) {
         filledSegments = srsStage - 4;
         stageClass = "guru";
     } else {
-        // Master, Enlightened, Burned - no progress bar needed (only 1 level each)
-        return "";
+        // Master, Enlightened, Burned - return empty container only if alwaysShowContainer is true
+        return alwaysShowContainer
+            ? '<div class="progress-segments"></div>'
+            : "";
     }
 
     let segmentsHtml = "";
