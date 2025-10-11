@@ -318,7 +318,7 @@ function showLessonSelectionScreen(items) {
         updateLessonSelectedCount
     );
 
-    // Sort items by rank (SRS stage) - lower numbers first, null/undefined last
+    // Sort items by rank (SRS stage) - null/undefined (locked) first, then lower numbers first
     const sortedItems = sortKanjiByRank(items);
 
     // Create checkboxes for each kanji

@@ -307,7 +307,7 @@ function updatePreviewGrid(items = []) {
     // Clear grid before populating
     previewGrid.innerHTML = "";
 
-    // Sort items by rank (SRS stage) - lower numbers first, null/undefined last
+    // Sort items by rank (SRS stage) - null/undefined (locked) first, then lower numbers first
     const sortedItems = sortKanjiByRank(items);
 
     // Show all kanji in preview
