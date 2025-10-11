@@ -1890,51 +1890,43 @@
 
         <!-- Theme Management -->
         <script>
+            // Shared theme helper functions
+            function getSystemTheme() {
+                return window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light";
+            }
+
+            function applyTheme(theme) {
+                const actualTheme =
+                    theme === "system" ? getSystemTheme() : theme;
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    actualTheme
+                );
+            }
+
+            function updateAllThemeIcons(actualTheme) {
+                // Update all sun and moon icons across all theme toggle buttons
+                const sunIcons = document.querySelectorAll(".theme-icon-sun");
+                const moonIcons = document.querySelectorAll(".theme-icon-moon");
+
+                // Show sun or moon based on actual applied theme
+                if (actualTheme === "light") {
+                    sunIcons.forEach((icon) => icon.classList.remove("hidden"));
+                    moonIcons.forEach((icon) => icon.classList.add("hidden"));
+                } else {
+                    sunIcons.forEach((icon) => icon.classList.add("hidden"));
+                    moonIcons.forEach((icon) =>
+                        icon.classList.remove("hidden")
+                    );
+                }
+            }
+
             // Theme management - load saved theme on page load
             (function initTheme() {
                 const savedTheme =
                     localStorage.getItem("wanikanji-theme") || "system";
-
-                function getSystemTheme() {
-                    return window.matchMedia("(prefers-color-scheme: dark)")
-                        .matches
-                        ? "dark"
-                        : "light";
-                }
-
-                function applyTheme(theme) {
-                    const actualTheme =
-                        theme === "system" ? getSystemTheme() : theme;
-                    document.documentElement.setAttribute(
-                        "data-theme",
-                        actualTheme
-                    );
-                }
-
-                function updateAllThemeIcons(actualTheme) {
-                    // Update all sun and moon icons across all theme toggle buttons
-                    const sunIcons =
-                        document.querySelectorAll(".theme-icon-sun");
-                    const moonIcons =
-                        document.querySelectorAll(".theme-icon-moon");
-
-                    // Show sun or moon based on actual applied theme
-                    if (actualTheme === "light") {
-                        sunIcons.forEach((icon) =>
-                            icon.classList.remove("hidden")
-                        );
-                        moonIcons.forEach((icon) =>
-                            icon.classList.add("hidden")
-                        );
-                    } else {
-                        sunIcons.forEach((icon) =>
-                            icon.classList.add("hidden")
-                        );
-                        moonIcons.forEach((icon) =>
-                            icon.classList.remove("hidden")
-                        );
-                    }
-                }
 
                 // Apply the theme and update icons
                 const actualTheme =
@@ -1962,47 +1954,6 @@
                     document.querySelectorAll(".theme-toggle-btn");
 
                 if (themeToggleButtons.length === 0) return;
-
-                function getSystemTheme() {
-                    return window.matchMedia("(prefers-color-scheme: dark)")
-                        .matches
-                        ? "dark"
-                        : "light";
-                }
-
-                function applyTheme(theme) {
-                    const actualTheme =
-                        theme === "system" ? getSystemTheme() : theme;
-                    document.documentElement.setAttribute(
-                        "data-theme",
-                        actualTheme
-                    );
-                }
-
-                function updateAllThemeIcons(actualTheme) {
-                    // Update all sun and moon icons across all theme toggle buttons
-                    const sunIcons =
-                        document.querySelectorAll(".theme-icon-sun");
-                    const moonIcons =
-                        document.querySelectorAll(".theme-icon-moon");
-
-                    // Show sun or moon based on actual applied theme
-                    if (actualTheme === "light") {
-                        sunIcons.forEach((icon) =>
-                            icon.classList.remove("hidden")
-                        );
-                        moonIcons.forEach((icon) =>
-                            icon.classList.add("hidden")
-                        );
-                    } else {
-                        sunIcons.forEach((icon) =>
-                            icon.classList.add("hidden")
-                        );
-                        moonIcons.forEach((icon) =>
-                            icon.classList.remove("hidden")
-                        );
-                    }
-                }
 
                 // Add click event to all theme toggle buttons
                 themeToggleButtons.forEach((button) => {
