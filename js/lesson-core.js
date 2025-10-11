@@ -318,8 +318,11 @@ function showLessonSelectionScreen(items) {
         updateLessonSelectedCount
     );
 
+    // Sort items by rank (SRS stage) - lower numbers first, null/undefined last
+    const sortedItems = sortKanjiByRank(items);
+
     // Create checkboxes for each kanji
-    items.forEach((item) => {
+    sortedItems.forEach((item) => {
         const kanjiItem = document.createElement("label");
         kanjiItem.className =
             "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";

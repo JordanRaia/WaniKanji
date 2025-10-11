@@ -307,8 +307,11 @@ function updatePreviewGrid(items = []) {
     // Clear grid before populating
     previewGrid.innerHTML = "";
 
+    // Sort items by rank (SRS stage) - lower numbers first, null/undefined last
+    const sortedItems = sortKanjiByRank(items);
+
     // Show all kanji in preview
-    items.forEach((item) => {
+    sortedItems.forEach((item) => {
         const kanjiEl = document.createElement("a");
 
         // Get assignment data to determine SRS stage
@@ -322,9 +325,9 @@ function updatePreviewGrid(items = []) {
             const stageName = getSrsStageName(srsStage);
             stageInfo = ` [${stageName}]`;
         }
-        const tooltipText = `${item.meanings.join(", ")} | ${item.readings.join(
-            ", "
-        )}${stageInfo}`;
+        const tooltipText = `${escapeHtml(
+            item.meanings.join(", ")
+        )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
 
         kanjiEl.className = `tooltip h-10 rounded flex items-center justify-center text-lg font-medium hover:brightness-95 transition-all cursor-pointer ${colorClasses}`;
         kanjiEl.setAttribute("data-tip", tooltipText);

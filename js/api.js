@@ -122,3 +122,27 @@ async function fetchSubjectsByIds(token, subjectIds) {
         };
     });
 }
+
+// Helper function to sort kanji by rank (SRS stage)
+function sortKanjiByRank(items) {
+    return [...items].sort((a, b) => {
+        const assignmentA = cachedKanjiData.assignments.get(a.id);
+        const assignmentB = cachedKanjiData.assignments.get(b.id);
+        const srsStageA = assignmentA ? assignmentA.srsStage : null;
+        const srsStageB = assignmentB ? assignmentB.srsStage : null;
+
+        // Handle null/undefined values (locked kanji) - put them at the beginning
+        if (srsStageA === null || srsStageA === undefined) {
+            if (srsStageB === null || srsStageB === undefined) {
+                return 0; // Both are locked, maintain original order
+            }
+            return -1; // A is locked, B is not, so A goes before B
+        }
+        if (srsStageB === null || srsStageB === undefined) {
+            return 1; // B is locked, A is not, so A goes after B
+        }
+
+        // Both have SRS stages, sort numerically
+        return srsStageA - srsStageB;
+    });
+}
