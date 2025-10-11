@@ -300,6 +300,89 @@ let selectionScreenKanjiItems = [];
 // Store the last quiz items for "Try Again" functionality
 let lastQuizItems = [];
 
+// Helper function to populate stage filter checkboxes
+function populateStageFilters(
+    items,
+    containerId,
+    checkboxSelector,
+    updateCountFn
+) {
+    const container = document.getElementById(containerId);
+    const filtersDiv = container.querySelector(".flex");
+
+    // Clear existing filters
+    filtersDiv.innerHTML = "";
+
+    // Collect all unique stages present in items
+    const stagesPresent = new Set();
+    items.forEach((item) => {
+        const assignment = cachedKanjiData.assignments.get(item.id);
+        const srsStage = assignment ? assignment.srsStage : null;
+        const stageName =
+            srsStage === null || srsStage === undefined
+                ? "locked"
+                : getSrsStageName(srsStage).toLowerCase();
+        stagesPresent.add(stageName);
+    });
+
+    // Define stage order
+    const stageOrder = [
+        "locked",
+        "apprentice",
+        "guru",
+        "master",
+        "enlightened",
+        "burned",
+    ];
+
+    // Map stages to checkbox colors
+    const stageColors = {
+        locked: "checkbox-neutral",
+        apprentice: "checkbox-secondary",
+        guru: "checkbox-primary",
+        master: "checkbox-info",
+        enlightened: "checkbox-success",
+        burned: "checkbox-warning",
+    };
+
+    // Create checkbox for each present stage
+    stageOrder.forEach((stage) => {
+        if (!stagesPresent.has(stage)) {
+            return;
+        }
+
+        const label = document.createElement("label");
+        label.className = "flex items-center gap-2 cursor-pointer";
+
+        const stageName = stage.charAt(0).toUpperCase() + stage.slice(1);
+        const colorClass = stageColors[stage] || "";
+
+        label.innerHTML = `
+            <input type="checkbox" 
+                   class="checkbox checkbox-sm stage-filter-checkbox ${colorClass}" 
+                   data-stage="${stage}" 
+                   checked />
+            <span class="text-sm">${stageName}</span>
+        `;
+
+        filtersDiv.appendChild(label);
+
+        // Add event listener
+        const checkbox = label.querySelector("input");
+        checkbox.addEventListener("change", () => {
+            const shouldCheck = checkbox.checked;
+            document
+                .querySelectorAll(checkboxSelector)
+                .forEach((kanjiCheckbox) => {
+                    if (kanjiCheckbox.dataset.srsStage === stage) {
+                        kanjiCheckbox.checked = shouldCheck;
+                    }
+                });
+            updateCountFn();
+        });
+    });
+}
+
 // Kanji Selection Screen Functions
 function showKanjiSelectionScreen(items) {
     // Store items for later use
@@ -317,21 +400,52 @@ function showKanjiSelectionScreen(items) {
     // Set total count
     totalKanjiCount.textContent = items.length;
 
+    // Populate stage filter checkboxes
+    populateStageFilters(
+        items,
+        "quizStageFilters",
+        ".kanji-checkbox",
+        updateSelectedCount
+    );
+
     // Create checkboxes for each kanji
     items.forEach((item, index) => {
         const kanjiItem = document.createElement("label");
         kanjiItem.className =
             "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";
-        kanjiItem.title = `${escapeHtml(
+
+        // Get assignment data to determine SRS stage
+        const assignment = cachedKanjiData.assignments.get(item.id);
+        const srsStage = assignment ? assignment.srsStage : null;
+
+        // Build tooltip text
+        let stageInfo = "";
+        if (srsStage !== null && srsStage !== undefined) {
+            const stageName = getSrsStageName(srsStage);
+            stageInfo = ` [${stageName}]`;
+        }
+        const tooltipText = `${escapeHtml(
             item.meanings.join(", ")
-        )} | ${escapeHtml(item.readings.join(", "))}`;
+        )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
+
+        // Get color classes for kanji based on SRS stage
+        const colorClasses = getSrsStageColorClass(srsStage);
+
+        // Determine stage name for filtering
+        const stageName =
+            srsStage === null || srsStage === undefined
+                ? "locked"
+                : getSrsStageName(srsStage).toLowerCase();
 
         kanjiItem.innerHTML = `
             <input type="checkbox" 
                    class="checkbox checkbox-sm kanji-checkbox" 
                    data-kanji-id="${escapeHtml(String(item.id))}" 
+                   data-srs-stage="${escapeHtml(stageName)}"
                    checked />
-            <span class="text-2xl mt-1">${escapeHtml(item.kanji)}</span>
+            <span class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses}" data-tip="${tooltipText}">${escapeHtml(
+            item.kanji
+        )}</span>
         `;
 
         kanjiGrid.appendChild(kanjiItem);

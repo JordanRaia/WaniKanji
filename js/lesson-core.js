@@ -310,21 +310,52 @@ function showLessonSelectionScreen(items) {
     // Set total count
     totalKanjiCount.textContent = items.length;
 
+    // Populate stage filter checkboxes
+    populateStageFilters(
+        items,
+        "lessonStageFilters",
+        ".lesson-kanji-checkbox",
+        updateLessonSelectedCount
+    );
+
     // Create checkboxes for each kanji
     items.forEach((item) => {
         const kanjiItem = document.createElement("label");
         kanjiItem.className =
             "flex flex-col items-center cursor-pointer hover:bg-base-300 p-2 rounded-lg transition-colors";
-        kanjiItem.title = `${escapeHtml(
+
+        // Get assignment data to determine SRS stage
+        const assignment = cachedKanjiData.assignments.get(item.id);
+        const srsStage = assignment ? assignment.srsStage : null;
+
+        // Build tooltip text
+        let stageInfo = "";
+        if (srsStage !== null && srsStage !== undefined) {
+            const stageName = getSrsStageName(srsStage);
+            stageInfo = ` [${stageName}]`;
+        }
+        const tooltipText = `${escapeHtml(
             item.meanings.join(", ")
-        )} | ${escapeHtml(item.readings.join(", "))}`;
+        )} | ${escapeHtml(item.readings.join(", "))}${stageInfo}`;
+
+        // Get color classes for kanji based on SRS stage
+        const colorClasses = getSrsStageColorClass(srsStage);
+
+        // Determine stage name for filtering
+        const stageName =
+            srsStage === null || srsStage === undefined
+                ? "locked"
+                : getSrsStageName(srsStage).toLowerCase();
 
         kanjiItem.innerHTML = `
             <input type="checkbox" 
                    class="checkbox checkbox-sm lesson-kanji-checkbox" 
                    data-kanji-id="${escapeHtml(String(item.id))}" 
+                   data-srs-stage="${escapeHtml(stageName)}"
                    checked />
-            <span class="text-2xl mt-1">${escapeHtml(item.kanji)}</span>
+            <span class="tooltip text-2xl mt-1 px-2 py-1 rounded ${colorClasses}" data-tip="${tooltipText}">${escapeHtml(
+            item.kanji
+        )}</span>
         `;
 
         kanjiGrid.appendChild(kanjiItem);

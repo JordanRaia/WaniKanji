@@ -263,6 +263,35 @@ function updateKanjiCountAndPreview() {
     updatePreviewGrid(filteredKanji);
 }
 
+// Helper function to get SRS stage color classes using daisyUI semantic colors
+function getSrsStageColorClass(srsStage) {
+    if (srsStage === undefined || srsStage === null) {
+        // No assignment - locked (black/neutral)
+        return "bg-neutral/60 text-neutral-content border-neutral";
+    }
+
+    // Map SRS stages to daisyUI semantic colors with subtle opacity
+    if (srsStage >= 1 && srsStage <= 4) {
+        // Apprentice
+        return "bg-secondary/40 text-base-content border-secondary/50";
+    } else if (srsStage >= 5 && srsStage <= 6) {
+        // Guru
+        return "bg-primary/40 text-base-content border-primary/50";
+    } else if (srsStage === 7) {
+        // Master
+        return "bg-info/40 text-base-content border-info/50";
+    } else if (srsStage === 8) {
+        // Enlightened
+        return "bg-success/40 text-base-content border-success/50";
+    } else if (srsStage === 9) {
+        // Burned
+        return "bg-warning/40 text-base-content border-warning/50";
+    }
+
+    // Default fallback
+    return "bg-base-300 text-base-content border-base-content/20";
+}
+
 // Update preview grid with kanji
 function updatePreviewGrid(items = []) {
     const previewGrid = document.getElementById("previewGrid");
@@ -280,15 +309,54 @@ function updatePreviewGrid(items = []) {
 
     // Show all kanji in preview
     items.forEach((item) => {
-        const kanjiEl = document.createElement("div");
-        kanjiEl.className =
-            "h-10 rounded flex items-center justify-center text-lg font-medium bg-base-100 border border-base-300 hover:bg-base-300 transition-colors cursor-default";
-        kanjiEl.textContent = item.kanji;
-        kanjiEl.title = `${item.meanings.join(", ")} | ${item.readings.join(
+        const kanjiEl = document.createElement("a");
+
+        // Get assignment data to determine SRS stage
+        const assignment = cachedKanjiData.assignments.get(item.id);
+        const srsStage = assignment ? assignment.srsStage : null;
+        const colorClasses = getSrsStageColorClass(srsStage);
+
+        // Build tooltip text
+        let stageInfo = "";
+        if (srsStage !== null && srsStage !== undefined) {
+            const stageName = getSrsStageName(srsStage);
+            stageInfo = ` [${stageName}]`;
+        }
+        const tooltipText = `${item.meanings.join(", ")} | ${item.readings.join(
             ", "
+        )}${stageInfo}`;
+
+        kanjiEl.className = `tooltip h-10 rounded flex items-center justify-center text-lg font-medium hover:brightness-95 transition-all cursor-pointer ${colorClasses}`;
+        kanjiEl.setAttribute("data-tip", tooltipText);
+        kanjiEl.href = `https://www.wanikani.com/kanji/${encodeURIComponent(
+            item.kanji
         )}`;
+        kanjiEl.target = "_blank";
+        kanjiEl.rel = "noopener noreferrer";
+        kanjiEl.textContent = item.kanji;
+
         previewGrid.appendChild(kanjiEl);
     });
+}
+
+// Helper function to get SRS stage name
+function getSrsStageName(srsStage) {
+    if (srsStage >= 1 && srsStage <= 4) {
+        return "Apprentice";
+    }
+    if (srsStage >= 5 && srsStage <= 6) {
+        return "Guru";
+    }
+    if (srsStage === 7) {
+        return "Master";
+    }
+    if (srsStage === 8) {
+        return "Enlightened";
+    }
+    if (srsStage === 9) {
+        return "Burned";
+    }
+    return "Locked";
 }
 
 function clearPreviewGrid() {
