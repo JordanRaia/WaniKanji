@@ -126,7 +126,13 @@ function resetButtonsFromLoading(config) {
     buttonIds.forEach((id) => {
         const btn = document.getElementById(id);
         if (btn) {
-            btn.disabled = defaultStates[id] === false ? false : false;
+            const isEnabled = Object.prototype.hasOwnProperty.call(
+                defaultStates,
+                id
+            )
+                ? defaultStates[id]
+                : true;
+            btn.disabled = !isEnabled;
             if (defaultTexts[id]) {
                 btn.textContent = defaultTexts[id];
             }
