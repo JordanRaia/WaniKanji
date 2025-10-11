@@ -91,11 +91,7 @@ function applyColorConfig() {
  */
 function calculateQuizScores() {
     // Check if multiple modes are enabled, use question-based tracking
-    const modesCount =
-        (modeKanjiToEnglish ? 1 : 0) +
-        (readingMode ? 1 : 0) +
-        (modeEnglishToKanji ? 1 : 0);
-    const isMultiMode = modesCount > 1;
+    const { isMultiMode } = getQuizModeInfo();
 
     let finalCorrectCount = correctCount;
     let finalIncorrectCount = incorrectCount;
@@ -189,11 +185,7 @@ function displayKanjiResults(
     const incorrectKanjiList = document.getElementById(incorrectListId);
 
     // Check if multiple modes are selected
-    const modesCount =
-        (modeKanjiToEnglish ? 1 : 0) +
-        (readingMode ? 1 : 0) +
-        (modeEnglishToKanji ? 1 : 0);
-    const isMultiMode = modesCount > 1;
+    const { isMultiMode } = getQuizModeInfo();
 
     if (isMultiMode) {
         // Display individual questions for multi-mode - separate meaning, reading, and english to kanji

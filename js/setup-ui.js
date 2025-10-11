@@ -110,13 +110,16 @@ levelSelect.addEventListener("change", () => {
     levelDisplay.textContent = `Level ${levelSelect.value}`;
 });
 
-// Cache for preloaded kanji data
-let cachedKanjiData = {
+// Cache for preloaded kanji data (global so it can be accessed by other modules)
+window.cachedKanjiData = {
     token: null,
     level: null,
     allKanji: [],
     assignments: new Map(),
 };
+
+// Local reference for convenience
+let { cachedKanjiData } = window;
 
 // Request cancellation for race condition prevention
 let currentRequestId = 0;
@@ -128,12 +131,13 @@ async function preloadKanjiData() {
     const level = levelSelect.value;
 
     if (!token || token.length < 10) {
-        cachedKanjiData = {
+        window.cachedKanjiData = {
             token: null,
             level: null,
             allKanji: [],
             assignments: new Map(),
         };
+        cachedKanjiData = window.cachedKanjiData;
         document.getElementById("kanjiCountDisplay").textContent = "—";
         document.getElementById("previewCount").textContent = "0";
         clearPreviewGrid();
@@ -194,12 +198,13 @@ async function preloadKanjiData() {
         }
 
         // Cache the data
-        cachedKanjiData = {
+        window.cachedKanjiData = {
             token,
             level,
             allKanji,
             assignments,
         };
+        cachedKanjiData = window.cachedKanjiData;
 
         // Hide loading state and update display
         hideLoadingState();
@@ -210,12 +215,13 @@ async function preloadKanjiData() {
             return; // Ignore errors from stale requests
         }
         hideLoadingState();
-        cachedKanjiData = {
+        window.cachedKanjiData = {
             token: null,
             level: null,
             allKanji: [],
             assignments: new Map(),
         };
+        cachedKanjiData = window.cachedKanjiData;
         document.getElementById("kanjiCountDisplay").textContent = "—";
         document.getElementById("previewCount").textContent = "0";
         clearPreviewGrid();
@@ -263,34 +269,7 @@ function updateKanjiCountAndPreview() {
     updatePreviewGrid(filteredKanji);
 }
 
-// Helper function to get SRS stage color classes using daisyUI semantic colors
-function getSrsStageColorClass(srsStage) {
-    if (srsStage === undefined || srsStage === null) {
-        // No assignment - locked (black/neutral)
-        return "bg-neutral/60 text-neutral-content border-neutral";
-    }
-
-    // Map SRS stages to daisyUI semantic colors with subtle opacity
-    if (srsStage >= 1 && srsStage <= 4) {
-        // Apprentice
-        return "bg-secondary/40 text-base-content border-secondary/50";
-    } else if (srsStage >= 5 && srsStage <= 6) {
-        // Guru
-        return "bg-primary/40 text-base-content border-primary/50";
-    } else if (srsStage === 7) {
-        // Master
-        return "bg-info/40 text-base-content border-info/50";
-    } else if (srsStage === 8) {
-        // Enlightened
-        return "bg-success/40 text-base-content border-success/50";
-    } else if (srsStage === 9) {
-        // Burned
-        return "bg-warning/40 text-base-content border-warning/50";
-    }
-
-    // Default fallback
-    return "bg-base-300 text-base-content border-base-content/20";
-}
+// Note: getSrsStageColorClass() is now in srs-utils.js
 
 // Update preview grid with kanji
 function updatePreviewGrid(items = []) {
@@ -350,25 +329,7 @@ function updatePreviewGrid(items = []) {
     });
 }
 
-// Helper function to get SRS stage name
-function getSrsStageName(srsStage) {
-    if (srsStage >= 1 && srsStage <= 4) {
-        return `Apprentice ${srsStage}`;
-    }
-    if (srsStage >= 5 && srsStage <= 6) {
-        return `Guru ${srsStage - 4}`;
-    }
-    if (srsStage === 7) {
-        return "Master";
-    }
-    if (srsStage === 8) {
-        return "Enlightened";
-    }
-    if (srsStage === 9) {
-        return "Burned";
-    }
-    return "Locked";
-}
+// Note: getSrsStageName() is now in srs-utils.js
 
 // Helper function to generate progress bar HTML based on SRS stage
 // @param {number|null} srsStage - The SRS stage number

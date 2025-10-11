@@ -44,12 +44,9 @@ function normalize(str) {
     return (str || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+// Shuffle function now uses shared shuffleArray() from common-utils.js
 function shuffle(a) {
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
+    return shuffleArray(a);
 }
 
 async function prefetchQuizRelatedSubjects(items, token) {
@@ -311,26 +308,10 @@ function checkAnswer() {
             }
         }
     } else if (card.questionType === "kanji-to-english") {
-        const got = normalize(raw);
-
-        // First try exact match
-        for (const m of card.meanings) {
-            if (normalize(m) === got) {
-                ok = true;
-                break;
-            }
-        }
-
-        // If no exact match, try fuzzy matching
-        if (!ok) {
-            const normalizedMeanings = card.meanings.map((m) => normalize(m));
-            const fuzzyResult = findBestFuzzyMatch(got, normalizedMeanings, 80);
-
-            if (fuzzyResult.isMatch) {
-                ok = true;
-                hasTypo = fuzzyResult.hasTypo;
-            }
-        }
+        // Use shared validation helper
+        const validationResult = validateAnswer(raw, card.meanings, true);
+        ok = validationResult.isCorrect;
+        hasTypo = validationResult.hasTypo;
     } else if (card.questionType === "english-to-kanji") {
         if (raw.trim() === card.kanji) {
             ok = true;
@@ -430,11 +411,7 @@ function checkAnswer() {
         correctKanji.add(card.kanji);
 
         // Track individual question performance when multiple modes are enabled
-        const modesCount =
-            (modeKanjiToEnglish ? 1 : 0) +
-            (readingMode ? 1 : 0) +
-            (modeEnglishToKanji ? 1 : 0);
-        const isMultiMode = modesCount > 1;
+        const { isMultiMode } = getQuizModeInfo();
 
         if (isMultiMode) {
             // Create a unique identifier for this specific question
@@ -468,11 +445,7 @@ function checkAnswer() {
         incorrectKanji.add(card.kanji);
 
         // Track individual question performance when multiple modes are enabled
-        const modesCount =
-            (modeKanjiToEnglish ? 1 : 0) +
-            (readingMode ? 1 : 0) +
-            (modeEnglishToKanji ? 1 : 0);
-        const isMultiMode = modesCount > 1;
+        const { isMultiMode } = getQuizModeInfo();
 
         if (isMultiMode) {
             // Create a unique identifier for this specific question

@@ -428,13 +428,11 @@ function showKanjiSelectionScreen(items) {
 }
 
 function updateSelectedCount() {
-    const checkboxes = document.querySelectorAll(".kanji-checkbox");
-    const checked = document.querySelectorAll(".kanji-checkbox:checked");
-    document.getElementById("selectedCount").textContent = checked.length;
-
-    // Disable start button if no kanji selected
-    const startBtn = document.getElementById("startSelectedBtn");
-    startBtn.disabled = checked.length === 0;
+    updateSelectionCount(
+        ".kanji-checkbox",
+        "selectedCount",
+        "startSelectedBtn"
+    );
 }
 
 function resetSetupButtons() {
@@ -553,29 +551,8 @@ async function loadApiKey() {
             document.getElementById("levelSkeleton").classList.add("hidden");
             document.getElementById("level").classList.remove("hidden");
 
-            // Re-enable all basic controls
-            document.getElementById("level").disabled = false;
-            document.getElementById("srsFilterToggle").disabled = false;
-            document.getElementById("unlockedOnlyToggle").disabled = false;
-            document.getElementById("toggleToken").disabled = false;
-            document.getElementById("token").disabled = false;
-            document.getElementById("openFullSelector").disabled = false;
-
-            // Re-enable mode toggles
-            document.getElementById("modeToggle").disabled = false;
-            document.getElementById("readingToggle").disabled = false;
-            document.getElementById(
-                "modeEnglishToKanjiToggle"
-            ).disabled = false;
-
-            // Re-enable mode buttons (the visual button elements)
-            document.querySelectorAll("[data-mode]").forEach((btn) => {
-                btn.disabled = false;
-            });
-
-            // Re-enable lesson and learn buttons
-            document.getElementById("selectLessonBtn").disabled = false;
-            document.getElementById("learnKanjiBtn").disabled = false;
+            // Re-enable all controls using shared utility
+            enableAllControls();
 
             // Preload kanji data after level is loaded
             if (typeof preloadKanjiData === "function") {
@@ -604,25 +581,8 @@ async function loadApiKey() {
             clearPreviewGrid();
         }
 
-        // Re-enable all controls after initial load
-        document.getElementById("level").disabled = false;
-        document.getElementById("srsFilterToggle").disabled = false;
-        document.getElementById("unlockedOnlyToggle").disabled = false;
-        document.getElementById("modeToggle").disabled = false;
-        document.getElementById("readingToggle").disabled = false;
-        document.getElementById("modeEnglishToKanjiToggle").disabled = false;
-        document.getElementById("toggleToken").disabled = false;
-        document.getElementById("token").disabled = false;
-        document.getElementById("openFullSelector").disabled = false;
-
-        // Re-enable mode buttons (the visual button elements)
-        document.querySelectorAll("[data-mode]").forEach((btn) => {
-            btn.disabled = false;
-        });
-
-        // Re-enable lesson and learn buttons (always enabled)
-        document.getElementById("selectLessonBtn").disabled = false;
-        document.getElementById("learnKanjiBtn").disabled = false;
+        // Re-enable all controls after initial load using shared utility
+        enableAllControls();
 
         // Note: Quiz button states will be set by updateLoadButtonState()
         // which is called from hideLoadingState() after isInitialLoad is set to false
@@ -684,29 +644,8 @@ document.getElementById("token").addEventListener("input", async (e) => {
             document.getElementById("levelSkeleton").classList.add("hidden");
             document.getElementById("level").classList.remove("hidden");
 
-            // Re-enable all basic controls
-            document.getElementById("level").disabled = false;
-            document.getElementById("srsFilterToggle").disabled = false;
-            document.getElementById("unlockedOnlyToggle").disabled = false;
-            document.getElementById("toggleToken").disabled = false;
-            document.getElementById("token").disabled = false;
-            document.getElementById("openFullSelector").disabled = false;
-
-            // Re-enable mode toggles
-            document.getElementById("modeToggle").disabled = false;
-            document.getElementById("readingToggle").disabled = false;
-            document.getElementById(
-                "modeEnglishToKanjiToggle"
-            ).disabled = false;
-
-            // Re-enable mode buttons (the visual button elements)
-            document.querySelectorAll("[data-mode]").forEach((btn) => {
-                btn.disabled = false;
-            });
-
-            // Re-enable lesson and learn buttons (they don't depend on mode toggles)
-            document.getElementById("selectLessonBtn").disabled = false;
-            document.getElementById("learnKanjiBtn").disabled = false;
+            // Re-enable all controls using shared utility
+            enableAllControls();
 
             // Preload kanji data after level is loaded
             if (typeof preloadKanjiData === "function") {

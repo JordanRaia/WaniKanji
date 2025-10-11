@@ -16,117 +16,39 @@ const BATCH_SIZE = 5;
  * Shows the Learn Mode selection screen
  */
 function showLearnKanjiSelectionScreen(items) {
-    document.getElementById("setup").classList.add("hidden");
-    document
-        .getElementById("learnKanjiSelectionArea")
-        .classList.remove("hidden");
-
-    const kanjiGrid = document.getElementById("learnKanjiGrid");
-    const totalKanjiCount = document.getElementById("learnKanjiTotalCount");
-
-    // Clear existing grid
-    kanjiGrid.innerHTML = "";
-
-    // Set total count
-    totalKanjiCount.textContent = items.length;
-
-    // Reset randomize checkbox to unchecked
-    document.getElementById("learnRandomizeOrderToggle").checked = false;
-
-    // Store the original items before any sorting/randomization (for toggle re-sorting)
+    // Store items in module-level variable for learn mode logic
     learnSelectionScreenKanjiItems = items;
 
-    // Sort items by rank (SRS stage) or randomize based on checkbox
-    const randomizeOrder = document.getElementById(
-        "learnRandomizeOrderToggle"
-    ).checked;
-    const sortedItems = randomizeOrder
-        ? randomizeKanjiOrder(items)
-        : sortKanjiByRank(items);
-
-    // Store the displayed items (for starting learn mode in this order)
-    window.learnDisplayedKanjiItems = sortedItems;
-
-    // Create checkboxes for each kanji
-    sortedItems.forEach((item) => {
-        const kanjiItem = createKanjiSelectionItem(
-            item,
-            "learn-kanji-checkbox",
-            window.cachedKanjiData
-        );
-        kanjiGrid.appendChild(kanjiItem);
+    // Use shared selection screen function
+    showSelectionScreen({
+        items: items,
+        gridId: "learnKanjiGrid",
+        countIds: {
+            total: "learnKanjiTotalCount",
+            selected: "learnKanjiSelectedCount",
+        },
+        checkboxClass: "learn-kanji-checkbox",
+        buttonIds: {
+            start: "startLearnKanjiBtn",
+        },
+        randomizeToggleId: "learnRandomizeOrderToggle",
+        stageFiltersId: "learnStageFilters",
+        storageKey: "learnSelectionScreenKanjiItems",
+        displayedItemsKey: "learnDisplayedKanjiItems",
+        setupElementId: "setup",
+        selectionAreaId: "learnKanjiSelectionArea",
     });
-
-    // Update selected count
-    updateLearnKanjiSelectedCount();
-
-    // Add event listeners to checkboxes
-    document.querySelectorAll(".learn-kanji-checkbox").forEach((checkbox) => {
-        checkbox.addEventListener("change", updateLearnKanjiSelectedCount);
-    });
-
-    // Populate stage filter checkboxes AFTER kanji checkboxes are created
-    populateStageFilters(
-        items,
-        "learnStageFilters",
-        ".learn-kanji-checkbox",
-        updateLearnKanjiSelectedCount
-    );
-
-    // Add event listener to randomization checkbox
-    document
-        .getElementById("learnRandomizeOrderToggle")
-        .addEventListener("change", () => {
-            // Re-sort and re-render the kanji grid
-            const randomizeOrder = document.getElementById(
-                "learnRandomizeOrderToggle"
-            ).checked;
-            const sortedItems = randomizeOrder
-                ? randomizeKanjiOrder(learnSelectionScreenKanjiItems)
-                : sortKanjiByRank(learnSelectionScreenKanjiItems);
-
-            // Clear and re-populate the grid
-            const kanjiGrid = document.getElementById("learnKanjiGrid");
-            kanjiGrid.innerHTML = "";
-
-            sortedItems.forEach((item) => {
-                const kanjiItem = createKanjiSelectionItem(
-                    item,
-                    "learn-kanji-checkbox",
-                    window.cachedKanjiData
-                );
-                kanjiGrid.appendChild(kanjiItem);
-            });
-
-            // Re-add event listeners to new checkboxes
-            document
-                .querySelectorAll(".learn-kanji-checkbox")
-                .forEach((checkbox) => {
-                    checkbox.addEventListener(
-                        "change",
-                        updateLearnKanjiSelectedCount
-                    );
-                });
-
-            // Update selected count
-            updateLearnKanjiSelectedCount();
-
-            // Store the newly displayed items
-            window.learnDisplayedKanjiItems = sortedItems;
-        });
 }
 
 /**
  * Updates the selected count for Learn Mode selection screen
  */
 function updateLearnKanjiSelectedCount() {
-    const checked = document.querySelectorAll(".learn-kanji-checkbox:checked");
-    document.getElementById("learnKanjiSelectedCount").textContent =
-        checked.length;
-
-    // Disable start button if no kanji selected
-    const startBtn = document.getElementById("startLearnKanjiBtn");
-    startBtn.disabled = checked.length === 0;
+    updateSelectionCount(
+        ".learn-kanji-checkbox",
+        "learnKanjiSelectedCount",
+        "startLearnKanjiBtn"
+    );
 }
 
 /**

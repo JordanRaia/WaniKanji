@@ -341,142 +341,29 @@ function convertRomanjiToHiragana(romanji) {
         return "っ" + (romanjiToHiragana[char] || char);
     });
 
-    // Mapping that includes all combinations
-    const allMappings = {
-        // 3-character combinations first
-        kya: "きゃ",
-        kyu: "きゅ",
-        kyo: "きょ",
-        gya: "ぎゃ",
-        gyu: "ぎゅ",
-        gyo: "ぎょ",
-        sha: "しゃ",
-        shu: "しゅ",
-        sho: "しょ",
-        ja: "じゃ",
-        ju: "じゅ",
-        jo: "じょ",
-        cha: "ちゃ",
-        chu: "ちゅ",
-        cho: "ちょ",
-        nya: "にゃ",
-        nyu: "にゅ",
-        nyo: "にょ",
-        hya: "ひゃ",
-        hyu: "ひゅ",
-        hyo: "ひょ",
-        bya: "びゃ",
-        byu: "びゅ",
-        byo: "びょ",
-        pya: "ぴゃ",
-        pyu: "ぴゅ",
-        pyo: "ぴょ",
-        mya: "みゃ",
-        myu: "みゅ",
-        myo: "みょ",
-        rya: "りゃ",
-        ryu: "りゅ",
-        ryo: "りょ",
+    // Create a modified mapping that excludes standalone 'n' to avoid premature conversion
+    // A standalone 'n' at the end should not be converted yet (user might type 'na', 'ni', etc.)
+    const mappingWithoutN = { ...romanjiToHiragana };
+    delete mappingWithoutN.n;
 
-        // 2-character combinations
-        ka: "か",
-        ki: "き",
-        ku: "く",
-        ke: "け",
-        ko: "こ",
-        ga: "が",
-        gi: "ぎ",
-        gu: "ぐ",
-        ge: "げ",
-        go: "ご",
-        sa: "さ",
-        shi: "し",
-        si: "し",
-        su: "す",
-        se: "せ",
-        so: "そ",
-        za: "ざ",
-        ji: "じ",
-        zu: "ず",
-        ze: "ぜ",
-        zo: "ぞ",
-        ta: "た",
-        chi: "ち",
-        ti: "ち",
-        tsu: "つ",
-        tu: "つ",
-        te: "て",
-        to: "と",
-        da: "だ",
-        de: "で",
-        do: "ど",
-        na: "な",
-        ni: "に",
-        nu: "ぬ",
-        ne: "ね",
-        no: "の",
-        ha: "は",
-        hi: "ひ",
-        fu: "ふ",
-        hu: "ふ",
-        he: "へ",
-        ho: "ほ",
-        ba: "ば",
-        bi: "び",
-        bu: "ぶ",
-        be: "べ",
-        bo: "ぼ",
-        pa: "ぱ",
-        pi: "ぴ",
-        pu: "ぷ",
-        pe: "ぺ",
-        po: "ぽ",
-        ma: "ま",
-        mi: "み",
-        mu: "む",
-        me: "め",
-        mo: "も",
-        ya: "や",
-        yu: "ゆ",
-        yo: "よ",
-        ra: "ら",
-        ri: "り",
-        ru: "る",
-        re: "れ",
-        ro: "ろ",
-        wa: "わ",
-        wo: "を",
-
-        // Special cases
-        xtsu: "っ",
-        xtu: "っ",
-        aa: "ああ",
-        ii: "いい",
-        uu: "うう",
-        ee: "ええ",
-        oo: "おお",
-        ou: "おう",
-        ei: "えい",
-
-        // Single characters (only convert if not part of a larger combination)
-        a: "あ",
-        i: "い",
-        u: "う",
-        e: "え",
-        o: "お",
-    };
-
+    // Use the mapping object without 'n'
     // Sort by length (longest first) to avoid partial matches
-    const sortedKeys = Object.keys(allMappings).sort(
+    const sortedKeys = Object.keys(mappingWithoutN).sort(
         (a, b) => b.length - a.length
     );
 
     // Apply conversions in order of length
     for (const key of sortedKeys) {
         if (result.includes(key)) {
-            result = result.replace(new RegExp(key, "g"), allMappings[key]);
+            result = result.replace(new RegExp(key, "g"), mappingWithoutN[key]);
         }
     }
+
+    // Only convert standalone 'n' to ん if it's followed by a consonant or space (not at the very end)
+    // This allows 'n' + vowel combinations to work (na, ni, nu, ne, no)
+    // Exclude 'y' because it's used in special combinations (nya, nyu, nyo)
+    result = result.replace(/n([bcdfghjklmpqrstvwxz])/g, "ん$1");
+    result = result.replace(/n\s/g, "ん ");
 
     return result;
 }
